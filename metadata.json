@@ -1,0 +1,6 @@
+{
+  "name": "PK ĐIỆN TỬ - CAMERA - Phụ Kiện Điện Tử Cao Cấp",
+  "description": "Cửa hàng bán lẻ trực tuyến Phụ Kiện Điện Tử & Thiết Bị Camera chính hãng. Giao diện hiện đại, đặt hàng nhanh chóng tiện lợi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
