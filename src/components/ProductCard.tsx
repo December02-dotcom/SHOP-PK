@@ -37,12 +37,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
         {/* Top Badges */}
         <div className="absolute top-1.5 left-1.5 flex flex-col gap-1">
-          {product.isMall && (
-            <span className="bg-[#047857] text-white font-extrabold text-[9px] uppercase px-1.5 py-0.5 rounded-xs tracking-wider shadow-sm">
-              Mall
-            </span>
-          )}
-          {product.isFavorite && !product.isMall && (
+          {product.isFavorite && (
             <span className="bg-[#10b981] text-white font-bold text-[9px] px-1.5 py-0.5 rounded-xs shadow-sm">
               Yêu thích
             </span>

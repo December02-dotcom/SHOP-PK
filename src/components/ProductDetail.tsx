@@ -187,11 +187,6 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, onClose }
               <div>
                 {/* Title */}
                 <h1 className="text-base sm:text-lg font-bold text-gray-800 leading-snug">
-                  {product.isMall && (
-                    <span className="bg-[#047857] text-white font-black text-[10px] uppercase px-1.5 py-0.5 rounded-sm tracking-wider mr-2 align-middle">
-                      Mall
-                    </span>
-                  )}
                   {product.isBestSeller && (
                     <span className="bg-orange-500 text-white font-black text-[10px] uppercase px-1.5 py-0.5 rounded-sm tracking-wider mr-2 align-middle">
                       Bán Chạy

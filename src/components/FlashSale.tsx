@@ -103,11 +103,6 @@ export const FlashSale: React.FC = () => {
                       <span className="text-[7px] text-gray-900 uppercase font-bold">GIẢM</span>
                     </div>
                   )}
-                  {product.isMall && (
-                    <span className="absolute top-1.5 left-1.5 bg-[#047857] text-white font-extrabold text-[8px] uppercase px-1 rounded-sm">
-                      Mall
-                    </span>
-                  )}
                 </div>
 
                 {/* Pricing & Sales Bar */}
