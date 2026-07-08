@@ -36,6 +36,7 @@ interface AppContextType {
   addCategory: (category: Category) => void;
   updateCategory: (category: Category) => void;
   deleteCategory: (id: string) => void;
+  updateOrderStatus: (orderId: string, status: Order['status']) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -114,6 +115,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const deleteCategory = (id: string) => {
     setCategories((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  const updateOrderStatus = (orderId: string, status: Order['status']) => {
+    setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status } : o));
   };
 
   // Handle adding products to cart
@@ -342,7 +347,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteProduct,
         addCategory,
         updateCategory,
-        deleteCategory
+        deleteCategory,
+        updateOrderStatus
       }}
     >
       {children}
