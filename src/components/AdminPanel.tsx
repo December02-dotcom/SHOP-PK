@@ -134,6 +134,49 @@ export const AdminPanel: React.FC = () => {
   const [catIconName, setCatIconName] = useState('Shirt');
   const [catColor, setCatColor] = useState('bg-blue-50 text-blue-500');
 
+  // --- CUSTOM DIALOGS & CONFIRMATIONS ---
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
+
+  const [alertDialog, setAlertDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+  }>({
+    isOpen: false,
+    title: '',
+    message: ''
+  });
+
+  const triggerConfirm = (title: string, message: string, action: () => void) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      onConfirm: () => {
+        action();
+        setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+      }
+    });
+  };
+
+  const triggerAlert = (title: string, message: string) => {
+    setAlertDialog({
+      isOpen: true,
+      title,
+      message
+    });
+  };
+
   // --- ACTION HANDLERS ---
   const openAddProduct = () => {
     setEditingProduct(null);
@@ -204,7 +247,7 @@ export const AdminPanel: React.FC = () => {
   const handleSaveProduct = (e: React.FormEvent) => {
     e.preventDefault();
     if (!prodName.trim() || !prodImage.trim() || !prodCategory) {
-      alert('Vui lòng điền các trường bắt buộc (Tên, Hình ảnh, Danh mục)!');
+      triggerAlert('Lỗi nhập liệu', 'Vui lòng điền các trường bắt buộc (Tên, Hình ảnh, Danh mục)!');
       return;
     }
 
@@ -264,9 +307,9 @@ export const AdminPanel: React.FC = () => {
   };
 
   const handleDeleteProduct = (id: string, name: string) => {
-    if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}"?`)) {
+    triggerConfirm('Xóa sản phẩm', `Bạn có chắc chắn muốn xóa sản phẩm "${name}"?`, () => {
       deleteProduct(id);
-    }
+    });
   };
 
   // Specs helper functions
@@ -318,7 +361,7 @@ export const AdminPanel: React.FC = () => {
   const handleSaveCategory = (e: React.FormEvent) => {
     e.preventDefault();
     if (!catName.trim() || !catId.trim()) {
-      alert('Vui lòng nhập Mã danh mục và Tên danh mục!');
+      triggerAlert('Thông báo', 'Vui lòng nhập Mã danh mục và Tên danh mục!');
       return;
     }
 
@@ -336,7 +379,7 @@ export const AdminPanel: React.FC = () => {
     } else {
       // Check duplicate
       if (categories.some(c => c.id === formattedId)) {
-        alert('Mã danh mục này đã tồn tại! Vui lòng chọn mã khác.');
+        triggerAlert('Lỗi', 'Mã danh mục này đã tồn tại! Vui lòng chọn mã khác.');
         return;
       }
       addCategory(categoryData);
@@ -352,9 +395,9 @@ export const AdminPanel: React.FC = () => {
       confirmMsg = `Cảnh báo: Có ${productsInCat} sản phẩm đang thuộc danh mục này. Nếu bạn xóa danh mục, các sản phẩm sẽ không thể lọc theo danh mục này nữa. Bạn vẫn muốn xóa chứ?`;
     }
 
-    if (window.confirm(confirmMsg)) {
+    triggerConfirm('Xóa danh mục', confirmMsg, () => {
       deleteCategory(id);
-    }
+    });
   };
 
   // Filtered lists for the admin dashboard tables
@@ -950,9 +993,11 @@ export const AdminPanel: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    if (window.confirm(`Xác nhận chuyển trạng thái đơn hàng sang ĐANG GIAO HÀNG?`)) {
-                                      updateOrderStatus(o.id, 'shipping');
-                                    }
+                                    triggerConfirm(
+                                      'Xác nhận gửi hàng',
+                                      'Xác nhận chuyển trạng thái đơn hàng sang ĐANG GIAO HÀNG?',
+                                      () => updateOrderStatus(o.id, 'shipping')
+                                    );
                                   }}
                                   className="px-4 py-2 bg-[#059669] hover:bg-[#047857] text-white rounded font-bold text-xs uppercase tracking-wider shadow-sm transition-all cursor-pointer"
                                 >
@@ -961,9 +1006,11 @@ export const AdminPanel: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    if (window.confirm(`Bạn có chắc chắn muốn HỦY đơn hàng ${o.id}?`)) {
-                                      updateOrderStatus(o.id, 'cancelled');
-                                    }
+                                    triggerConfirm(
+                                      'Hủy đơn hàng',
+                                      `Bạn có chắc chắn muốn HỦY đơn hàng ${o.id}?`,
+                                      () => updateOrderStatus(o.id, 'cancelled')
+                                    );
                                   }}
                                   className="px-4 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
                                 >
@@ -978,9 +1025,11 @@ export const AdminPanel: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    if (window.confirm(`Xác nhận hoàn thành giao hàng thành công đơn hàng ${o.id}?`)) {
-                                      updateOrderStatus(o.id, 'completed');
-                                    }
+                                    triggerConfirm(
+                                      'Giao thành công',
+                                      `Xác nhận hoàn thành giao hàng thành công đơn hàng ${o.id}?`,
+                                      () => updateOrderStatus(o.id, 'completed')
+                                    );
                                   }}
                                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs uppercase tracking-wider shadow-sm transition-all cursor-pointer"
                                 >
@@ -989,9 +1038,11 @@ export const AdminPanel: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    if (window.confirm(`Đơn hàng bị trả lại hoặc giao thất bại? Xác nhận HỦY đơn hàng ${o.id}?`)) {
-                                      updateOrderStatus(o.id, 'cancelled');
-                                    }
+                                    triggerConfirm(
+                                      'Hủy đơn hàng',
+                                      `Đơn hàng bị trả lại hoặc giao thất bại? Xác nhận HỦY đơn hàng ${o.id}?`,
+                                      () => updateOrderStatus(o.id, 'cancelled')
+                                    );
                                   }}
                                   className="px-4 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
                                 >
@@ -1552,6 +1603,67 @@ export const AdminPanel: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================= */}
+      {/* 3. CUSTOM DIALOG: CONFIRMATION */}
+      {confirmDialog.isOpen && (
+        <div className="fixed inset-0 z-[200] overflow-y-auto bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl border border-gray-100 max-w-sm w-full p-6 space-y-4 animate-fade-in">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-amber-50 text-amber-600 rounded-lg shrink-0">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="font-extrabold text-gray-900 text-sm">{confirmDialog.title}</h4>
+                <p className="text-gray-500 text-xs mt-1 leading-relaxed">{confirmDialog.message}</p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+                className="px-4 py-2 text-xs font-bold text-gray-500 hover:bg-gray-100 rounded-md transition-all cursor-pointer"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                onClick={confirmDialog.onConfirm}
+                className="px-4 py-2 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold rounded-md shadow-sm transition-all cursor-pointer"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================= */}
+      {/* 4. CUSTOM DIALOG: ALERT */}
+      {alertDialog.isOpen && (
+        <div className="fixed inset-0 z-[200] overflow-y-auto bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl border border-gray-100 max-w-sm w-full p-6 space-y-4 animate-fade-in">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-rose-50 text-rose-600 rounded-lg shrink-0">
+                <Info className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="font-extrabold text-gray-900 text-sm">{alertDialog.title}</h4>
+                <p className="text-gray-500 text-xs mt-1 leading-relaxed">{alertDialog.message}</p>
+              </div>
+            </div>
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setAlertDialog(prev => ({ ...prev, isOpen: false }))}
+                className="px-5 py-2 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold rounded-md shadow-sm transition-all cursor-pointer"
+              >
+                Đồng ý
+              </button>
+            </div>
           </div>
         </div>
       )}
