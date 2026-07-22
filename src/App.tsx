@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/Header';
+import { BannerCarousel } from './components/BannerCarousel';
 import { CategoryList } from './components/CategoryList';
 import { FlashSale } from './components/FlashSale';
 import { ProductCard } from './components/ProductCard';
@@ -10,8 +11,10 @@ import { CheckoutModal } from './components/CheckoutModal';
 import { OrderHistory } from './components/OrderHistory';
 import { ShopChat } from './components/ShopChat';
 import { AdminPanel } from './components/AdminPanel';
+import { AuthModal } from './components/AuthModal';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { Footer } from './components/Footer';
-import { SlidersHorizontal, Check, RefreshCw, Sparkles } from 'lucide-react';
+import { SlidersHorizontal, Check, RefreshCw, Sparkles, Flame, Clock, TrendingUp } from 'lucide-react';
 
 const ShopContent: React.FC = () => {
   const {
@@ -25,7 +28,9 @@ const ShopContent: React.FC = () => {
     selectedCategory,
     setSelectedCategory,
     searchQuery,
-    setSearchQuery
+    setSearchQuery,
+    isAuthModalOpen,
+    setAuthModalOpen
   } = useApp();
 
   const [showCheckout, setShowCheckout] = useState(false);
@@ -57,6 +62,9 @@ const ShopContent: React.FC = () => {
       {/* Main Container Views Switcher */}
       {activeTab === 'home' && (
         <main className="space-y-6">
+          {/* Top Promotional Banner Carousel */}
+          <BannerCarousel />
+
           {/* Categories Grid */}
           <CategoryList />
 
@@ -162,8 +170,17 @@ const ShopContent: React.FC = () => {
         />
       )}
 
+      {/* Customer Login & Register Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+      />
+
       {/* Floating interactive Shop Chat */}
       <ShopChat />
+
+      {/* Mobile Sticky Bottom Navigation Bar */}
+      <MobileBottomNav />
 
       {/* Main Footer with Connections, Contact and Support */}
       <Footer />

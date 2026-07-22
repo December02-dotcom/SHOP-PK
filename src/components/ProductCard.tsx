@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Product } from '../types';
 import { useApp } from '../context/AppContext';
-import { Star, MapPin } from 'lucide-react';
+import { Star, MapPin, ShoppingCart, Check } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { setSelectedProduct } = useApp();
+  const { setSelectedProduct, addToCart } = useApp();
+  const [added, setAdded] = useState(false);
 
   const formatVND = (value: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
@@ -19,6 +20,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       return `Đã bán ${(sold / 1000).toFixed(1)}k`;
     }
     return `Đã bán ${sold}`;
+  };
+
+  const handleQuickAdd = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const defaultOpt = product.options && product.options.length > 0 ? product.options[0] : undefined;
+    addToCart(product, 1, defaultOpt);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1800);
   };
 
   return (
@@ -94,7 +103,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         </div>
 
-        {/* Footer Area: Price, Sold, Location */}
+        {/* Footer Area: Price, Sold, Location & Quick Add */}
         <div>
           <div className="flex items-center justify-between mt-1">
             <span className="text-[#059669] font-bold text-sm md:text-base">
@@ -106,17 +115,31 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
 
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-50 text-[10px] text-gray-500">
-            {/* Rating */}
-            <div className="flex items-center space-x-0.5">
-              <Star className="w-3 h-3 text-yellow-400 fill-current" />
-              <span className="font-semibold text-gray-700">{product.rating}</span>
+            {/* Rating & Location */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center space-x-0.5">
+                <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                <span className="font-semibold text-gray-700">{product.rating}</span>
+              </div>
+              <div className="flex items-center space-x-0.5 max-w-[70px] truncate">
+                <MapPin className="w-2.5 h-2.5 text-gray-400 shrink-0" />
+                <span className="truncate">{product.location}</span>
+              </div>
             </div>
 
-            {/* Location */}
-            <div className="flex items-center space-x-0.5 max-w-[80px] truncate">
-              <MapPin className="w-2.5 h-2.5 text-gray-400 shrink-0" />
-              <span className="truncate">{product.location}</span>
-            </div>
+            {/* Quick Add Button */}
+            <button
+              type="button"
+              onClick={handleQuickAdd}
+              title="Thêm nhanh vào giỏ hàng"
+              className={`p-1.5 rounded-full transition-all cursor-pointer flex items-center justify-center shrink-0 ${
+                added 
+                  ? 'bg-emerald-600 text-white scale-110' 
+                  : 'bg-emerald-50 hover:bg-[#059669] text-[#059669] hover:text-white'
+              }`}
+            >
+              {added ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <ShoppingCart className="w-3.5 h-3.5" />}
+            </button>
           </div>
         </div>
       </div>

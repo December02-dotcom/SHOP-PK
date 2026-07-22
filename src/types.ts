@@ -57,8 +57,25 @@ export interface ShippingAddress {
   street: string;
 }
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: 'customer' | 'admin';
+  createdAt: string;
+  avatar?: string;
+  address?: ShippingAddress;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: User;
+}
+
 export interface Order {
   id: string;
+  userId?: string;
   date: string;
   items: CartItem[];
   shippingAddress: ShippingAddress;

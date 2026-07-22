@@ -90,8 +90,33 @@ export const Cart: React.FC<CartProps> = ({ onCheckout }) => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 mt-6">
+      {/* Checkout Stepper Progress */}
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6 flex items-center justify-between max-w-2xl mx-auto text-xs font-semibold">
+        <div className="flex items-center gap-2 text-[#059669]">
+          <div className="w-6 h-6 rounded-full bg-[#059669] text-white flex items-center justify-center font-bold text-xs">
+            1
+          </div>
+          <span>Giỏ Hàng ({totalCartItems})</span>
+        </div>
+        <div className="w-12 md:w-24 h-0.5 bg-gray-200"></div>
+        <div className="flex items-center gap-2 text-gray-400">
+          <div className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-xs">
+            2
+          </div>
+          <span className="hidden sm:inline">Thông Tin Nhận Hàng</span>
+          <span className="sm:hidden">Đặt Hàng</span>
+        </div>
+        <div className="w-12 md:w-24 h-0.5 bg-gray-200"></div>
+        <div className="flex items-center gap-2 text-gray-400">
+          <div className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-xs">
+            3
+          </div>
+          <span>Hoàn Tất</span>
+        </div>
+      </div>
+
       <div className="flex items-center space-x-2 text-xs text-gray-500 mb-4">
-        <button onClick={() => setActiveTab('home')} className="hover:text-[#059669] flex items-center gap-1">
+        <button onClick={() => setActiveTab('home')} className="hover:text-[#059669] flex items-center gap-1 cursor-pointer">
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Quay lại trang chủ</span>
         </button>

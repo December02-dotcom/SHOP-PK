@@ -20,7 +20,10 @@ export const Header: React.FC = () => {
     cart, 
     activeTab, 
     setActiveTab,
-    setSelectedCategory
+    setSelectedCategory,
+    currentUser,
+    setAuthModalOpen,
+    logout
   } = useApp();
 
   const [inputVal, setInputVal] = useState(searchQuery);
@@ -84,12 +87,77 @@ export const Header: React.FC = () => {
           </button>
           
           <span className="w-[1px] h-3 bg-white/30"></span>
-          <div className="flex items-center space-x-1 hover:opacity-95 cursor-pointer">
-            <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-              <User className="w-3 h-3 text-white" />
+          
+          {/* User Account / Auth Section */}
+          {currentUser ? (
+            <div className="relative group">
+              <button 
+                type="button"
+                className="flex items-center space-x-1.5 hover:opacity-95 cursor-pointer bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded transition-all"
+              >
+                {currentUser.avatar ? (
+                  <img src={currentUser.avatar} alt={currentUser.name} className="w-5 h-5 rounded-full object-cover border border-white/40" />
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                    <User className="w-3 h-3 text-white" />
+                  </div>
+                )}
+                <span className="font-bold max-w-[120px] truncate">{currentUser.name}</span>
+                {currentUser.role === 'admin' ? (
+                  <span className="bg-amber-400 text-amber-950 text-[9px] font-black px-1 rounded uppercase">Admin</span>
+                ) : (
+                  <span className="bg-emerald-300 text-emerald-950 text-[9px] font-bold px-1 rounded">Khách</span>
+                )}
+              </button>
+
+              {/* Hover Dropdown Menu */}
+              <div className="absolute right-0 top-full pt-1 hidden group-hover:block w-48 z-50">
+                <div className="bg-white rounded-xl shadow-xl border border-gray-100 py-1 text-gray-800 text-xs">
+                  <div className="px-3 py-2 border-b border-gray-100 bg-gray-50/80">
+                    <p className="font-bold text-gray-900 truncate">{currentUser.name}</p>
+                    <p className="text-[10px] text-gray-500 truncate">{currentUser.email}</p>
+                  </div>
+                  
+                  {currentUser.role === 'admin' && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('admin')}
+                      className="w-full text-left px-3 py-2 hover:bg-emerald-50 text-emerald-700 font-semibold flex items-center gap-2 cursor-pointer"
+                    >
+                      <Store className="w-3.5 h-3.5" />
+                      <span>Trang Quản Lý</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('orders')}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
+                  >
+                    <History className="w-3.5 h-3.5 text-gray-500" />
+                    <span>Đơn Hàng Của Tôi</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={logout}
+                    className="w-full text-left px-3 py-2 hover:bg-red-50 text-red-600 font-medium flex items-center gap-2 border-t border-gray-100 cursor-pointer"
+                  >
+                    <span>Đăng Xuất</span>
+                  </button>
+                </div>
+              </div>
             </div>
-            <span className="font-semibold">Khách Hàng</span>
-          </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setAuthModalOpen(true)}
+              className="flex items-center space-x-1.5 bg-white text-[#059669] hover:bg-emerald-50 px-2.5 py-0.5 rounded font-bold transition-all cursor-pointer shadow-sm text-xs"
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>Đăng Nhập / Đăng Ký</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -108,21 +176,37 @@ export const Header: React.FC = () => {
 
         {/* Search Bar & Trends */}
         <div className="flex-1 max-w-2xl">
-          <form onSubmit={handleSearchSubmit} className="bg-white p-1 rounded-sm shadow-sm flex items-center">
+          <form onSubmit={handleSearchSubmit} className="bg-white p-1 rounded-lg shadow-sm flex items-center border border-emerald-300 focus-within:ring-2 focus-within:ring-emerald-300">
             <input
               type="text"
               placeholder="Tìm kiếm phụ kiện điện tử, camera chính hãng..."
-              className="flex-grow px-3 py-2 text-sm text-gray-800 placeholder-gray-400 outline-none"
+              className="flex-grow px-3 py-1.5 md:py-2 text-xs md:text-sm text-gray-800 placeholder-gray-400 outline-none w-full"
               value={inputVal}
               onChange={(e) => setInputVal(e.target.value)}
             />
             <button 
               type="submit" 
-              className="bg-[#059669] hover:bg-[#047857] text-white px-6 py-2 rounded-sm transition-colors cursor-pointer"
+              className="bg-[#059669] hover:bg-[#047857] text-white px-4 md:px-6 py-2 rounded-md transition-colors cursor-pointer flex items-center justify-center gap-1 font-bold text-xs"
             >
-              <Search className="w-4 h-4 md:w-5 md:h-5" />
+              <Search className="w-4 h-4" />
+              <span className="hidden sm:inline">Tìm kiếm</span>
             </button>
           </form>
+
+          {/* Quick Search Tags */}
+          <div className="hidden md:flex items-center gap-2 mt-1.5 text-[10px] text-white/90 overflow-x-auto">
+            <span className="opacity-75 font-medium shrink-0">Xu hướng:</span>
+            {['Camera Wifi', 'Thẻ Nhớ 64GB', 'Sạc Dự Phòng 20000mAh', 'Cam Hành Trình', 'Tai Nghe'].map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => handleTagClick(tag)}
+                className="hover:underline opacity-95 hover:opacity-100 transition-all whitespace-nowrap cursor-pointer"
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Shopping Cart Icon with Badge */}

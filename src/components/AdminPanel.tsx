@@ -28,7 +28,15 @@ import {
   ShoppingBag, 
   Baby,
   Eye,
-  Info
+  Info,
+  Clock,
+  Truck,
+  CheckCircle,
+  XCircle,
+  Calendar,
+  Phone,
+  ShieldCheck,
+  Users
 } from 'lucide-react';
 
 const iconMap: Record<string, React.ComponentType<any>> = {
@@ -80,10 +88,61 @@ export const AdminPanel: React.FC = () => {
     deleteCategory,
     setActiveTab,
     orders,
-    updateOrderStatus
+    updateOrderStatus,
+    currentUser,
+    adminLogin,
+    logout,
+    serverConnected
   } = useApp();
 
-  const [activeSubTab, setActiveSubTab] = useState<'products' | 'categories' | 'orders'>('products');
+  const [activeSubTab, setActiveSubTab] = useState<'products' | 'categories' | 'orders' | 'users'>('products');
+
+  // Admin login form state
+  const [adminUsername, setAdminUsername] = useState('admin');
+  const [adminPassword, setAdminPassword] = useState('admin123');
+  const [adminLoginErr, setAdminLoginErr] = useState<string | null>(null);
+  const [adminLoginLoading, setAdminLoginLoading] = useState(false);
+
+  // Registered customers list state from server
+  const [usersList, setUsersList] = useState<any[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+
+  // Fetch registered users when activeSubTab is 'users'
+  React.useEffect(() => {
+    if (currentUser?.role === 'admin' && activeSubTab === 'users') {
+      const fetchUsers = async () => {
+        setUsersLoading(true);
+        try {
+          const res = await fetch('/api/users');
+          if (res.ok) {
+            const data = await res.json();
+            setUsersList(data);
+          }
+        } catch (e) {
+          console.error('Failed to fetch users', e);
+        } finally {
+          setUsersLoading(false);
+        }
+      };
+      fetchUsers();
+    }
+  }, [currentUser, activeSubTab]);
+
+  const handleAdminSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminLoginErr(null);
+    setAdminLoginLoading(true);
+    try {
+      const res = await adminLogin(adminUsername, adminPassword);
+      if (!res.success) {
+        setAdminLoginErr(res.message);
+      }
+    } catch (err: any) {
+      setAdminLoginErr('Lỗi kết nối tới Web Server!');
+    } finally {
+      setAdminLoginLoading(false);
+    }
+  };
 
   // Products state & filters
   const [productSearch, setProductSearch] = useState('');
@@ -408,9 +467,77 @@ export const AdminPanel: React.FC = () => {
     return matchesSearch && matchesCategory;
   });
 
+  if (!currentUser || currentUser.role !== 'admin') {
+    return (
+      <div className="max-w-md mx-auto px-4 mt-12 mb-16">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          <div className="bg-gradient-to-r from-emerald-700 to-emerald-800 p-6 text-white text-center">
+            <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center mx-auto mb-3 border border-white/20 shadow-inner">
+              <ShieldCheck className="w-6 h-6 text-emerald-200" />
+            </div>
+            <h2 className="text-xl font-extrabold tracking-tight">Đăng Nhập Trang Quản Lý</h2>
+            <p className="text-xs text-emerald-100 mt-1">Dành riêng cho Quản trị viên & Chủ gian hàng</p>
+            
+            <div className="mt-3 inline-flex items-center gap-2 bg-emerald-900/40 text-emerald-200 px-3 py-1 rounded-full text-[11px] font-medium border border-emerald-400/30">
+              <span className={`w-2 h-2 rounded-full ${serverConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
+              <span>Web Server (Port 3000): {serverConnected ? 'Đã kết nối' : 'Đang kết nối...'}</span>
+            </div>
+          </div>
+
+          <form onSubmit={handleAdminSubmit} className="p-6 space-y-4">
+            {adminLoginErr && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-xs font-semibold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{adminLoginErr}</span>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 mb-1">Tài khoản Quản trị / Email</label>
+              <input
+                type="text"
+                required
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-[#059669]"
+                value={adminUsername}
+                onChange={(e) => setAdminUsername(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 mb-1">Mật khẩu</label>
+              <input
+                type="password"
+                required
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-[#059669]"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={adminLoginLoading}
+              className="w-full py-2.5 bg-[#059669] hover:bg-[#047857] text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+            >
+              {adminLoginLoading ? 'Đang xác thực...' : 'Đăng Nhập Quản Lý'}
+            </button>
+
+            <div className="pt-3 border-t border-gray-100 text-center">
+              <p className="text-[11px] text-gray-400 mb-1.5">Tài khoản quản trị mẫu mặc định:</p>
+              <div className="bg-gray-50 p-2.5 rounded text-[11px] text-gray-700 font-mono space-y-1 text-left border border-gray-100">
+                <p>• Tài khoản: <b>admin</b> hoặc <b>admin@pkdientu.vn</b></p>
+                <p>• Mật khẩu: <b>admin123</b></p>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 mt-6">
-      {/* Back to Home Header */}
+      {/* Back to Home Header & Admin Info */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <button 
           onClick={() => setActiveTab('home')} 
@@ -419,9 +546,17 @@ export const AdminPanel: React.FC = () => {
           <ArrowLeft className="w-4 h-4" />
           <span>Quay lại trang chủ PK ĐIỆN TỬ - CAMERA</span>
         </button>
-        <div className="flex items-center gap-2 bg-[#e6f4ea] text-[#059669] px-3 py-1.5 rounded-full text-xs font-bold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Kênh Người Bán Chính Thức</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-full text-xs font-bold">
+            <UserRound className="w-3.5 h-3.5 text-emerald-600" />
+            <span>{currentUser.name} (Admin)</span>
+          </div>
+          <button
+            onClick={logout}
+            className="text-xs text-red-600 hover:text-red-800 font-bold hover:underline cursor-pointer"
+          >
+            Đăng xuất
+          </button>
         </div>
       </div>
 
@@ -442,36 +577,51 @@ export const AdminPanel: React.FC = () => {
         <div className="flex border-b border-gray-100 bg-gray-50/50">
           <button
             onClick={() => setActiveSubTab('products')}
-            className={`flex-1 sm:flex-none px-6 py-3.5 font-bold text-sm text-center border-b-2 transition-all cursor-pointer flex items-center justify-center gap-2 ${
+            className={`flex-1 sm:flex-none px-4 sm:px-6 py-3.5 font-bold text-xs sm:text-sm text-center border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2 ${
               activeSubTab === 'products'
                 ? 'border-[#059669] text-[#059669] bg-white'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <Package className="w-4 h-4" />
-            <span>Quản Lý Sản Phẩm ({products.length})</span>
+            <Package className="w-4 h-4 shrink-0" />
+            <span className="hidden sm:inline">Quản Lý Sản Phẩm ({products.length})</span>
+            <span className="inline sm:hidden">Sản phẩm ({products.length})</span>
           </button>
           <button
             onClick={() => setActiveSubTab('categories')}
-            className={`flex-1 sm:flex-none px-6 py-3.5 font-bold text-sm text-center border-b-2 transition-all cursor-pointer flex items-center justify-center gap-2 ${
+            className={`flex-1 sm:flex-none px-4 sm:px-6 py-3.5 font-bold text-xs sm:text-sm text-center border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2 ${
               activeSubTab === 'categories'
                 ? 'border-[#059669] text-[#059669] bg-white'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <Tag className="w-4 h-4" />
-            <span>Quản Lý Danh Mục ({categories.length})</span>
+            <Tag className="w-4 h-4 shrink-0" />
+            <span className="hidden sm:inline">Quản Lý Danh Mục ({categories.length})</span>
+            <span className="inline sm:hidden">Danh mục ({categories.length})</span>
           </button>
           <button
             onClick={() => setActiveSubTab('orders')}
-            className={`flex-1 sm:flex-none px-6 py-3.5 font-bold text-sm text-center border-b-2 transition-all cursor-pointer flex items-center justify-center gap-2 ${
+            className={`flex-1 sm:flex-none px-4 sm:px-6 py-3.5 font-bold text-xs sm:text-sm text-center border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2 ${
               activeSubTab === 'orders'
                 ? 'border-[#059669] text-[#059669] bg-white'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <ShoppingBag className="w-4 h-4" />
-            <span>Quản Lý Đơn Hàng ({orders.length})</span>
+            <ShoppingBag className="w-4 h-4 shrink-0" />
+            <span className="hidden sm:inline">Quản Lý Đơn Hàng ({orders.length})</span>
+            <span className="inline sm:hidden">Đơn hàng ({orders.length})</span>
+          </button>
+          <button
+            onClick={() => setActiveSubTab('users')}
+            className={`flex-1 sm:flex-none px-4 sm:px-6 py-3.5 font-bold text-xs sm:text-sm text-center border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2 ${
+              activeSubTab === 'users'
+                ? 'border-[#059669] text-[#059669] bg-white'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <Users className="w-4 h-4 shrink-0" />
+            <span className="hidden sm:inline">Khách Hàng ({usersList.length})</span>
+            <span className="inline sm:hidden">Khách hàng ({usersList.length})</span>
           </button>
         </div>
 
@@ -519,123 +669,237 @@ export const AdminPanel: React.FC = () => {
             </div>
 
             {/* Products Table Wrapper */}
-            <div className="overflow-x-auto border border-gray-100 rounded-lg">
-              <table className="w-full text-left border-collapse min-w-[800px]">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-100 text-xs text-gray-500 font-bold uppercase tracking-wider">
-                    <th className="py-3 px-4">Sản Phẩm</th>
-                    <th className="py-3 px-4 w-32">Mã SP</th>
-                    <th className="py-3 px-4 w-36">Danh Mục</th>
-                    <th className="py-3 px-4 w-28 text-right">Giá Bán</th>
-                    <th className="py-3 px-4 w-28 text-center">Tồn Kho</th>
-                    <th className="py-3 px-4 w-24 text-center">Đã Bán</th>
-                    <th className="py-3 px-4 w-28 text-center">Nhãn Đặc Trưng</th>
-                    <th className="py-3 px-4 w-28 text-center">Thao Tác</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 text-xs text-gray-700">
-                  {adminFilteredProducts.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="py-12 text-center text-gray-400">
-                        <AlertCircle className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                        <p className="font-semibold">Không tìm thấy sản phẩm nào phù hợp</p>
-                        <p className="text-[10px] text-gray-400 mt-0.5">Vui lòng thử điều chỉnh lại bộ lọc tìm kiếm của bạn.</p>
-                      </td>
-                    </tr>
-                  ) : (
-                    adminFilteredProducts.map((p) => {
-                      const categoryObj = categories.find(c => c.id === p.category);
-                      return (
-                        <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="py-3.5 px-4 flex items-center space-x-3">
-                            <div className="w-12 h-12 rounded border border-gray-100 overflow-hidden shrink-0 bg-gray-50">
-                              <img src={p.image} alt={p.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+            <div className="border border-gray-100 rounded-xl overflow-hidden bg-white shadow-3xs">
+              {/* Mobile Card Layout */}
+              <div className="block md:hidden divide-y divide-gray-100 animate-fade-in">
+                {adminFilteredProducts.length === 0 ? (
+                  <div className="py-12 text-center text-gray-400 bg-gray-50/50">
+                    <AlertCircle className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                    <p className="font-semibold text-xs">Không tìm thấy sản phẩm nào phù hợp</p>
+                  </div>
+                ) : (
+                  adminFilteredProducts.map((p) => {
+                    const categoryObj = categories.find(c => c.id === p.category);
+                    return (
+                      <div key={p.id} className="p-4 flex flex-col gap-3 hover:bg-gray-50/50 transition-colors">
+                        <div className="flex gap-3">
+                          {/* Image */}
+                          <div className="w-16 h-16 rounded-lg border border-gray-100 overflow-hidden shrink-0 bg-gray-50">
+                            <img src={p.image} alt={p.name} className="w-full h-full object-cover" onError={(e) => { (e.target as any).src = 'https://placehold.co/150?text=Error'; }} referrerPolicy="no-referrer" />
+                          </div>
+                          {/* Title & Info */}
+                          <div className="min-w-0 flex-grow space-y-1">
+                            <h4 className="font-bold text-gray-800 text-xs line-clamp-2 leading-relaxed" title={p.name}>
+                              {p.name}
+                            </h4>
+                            <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
+                              <span className="font-mono text-gray-400 bg-gray-50 px-1 rounded">ID: {p.id}</span>
+                              <span className="text-gray-500 bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5">
+                                <Tag className="w-2.5 h-2.5 shrink-0" />
+                                {categoryObj ? categoryObj.name : p.category}
+                              </span>
                             </div>
-                            <div className="min-w-0 max-w-[280px]">
-                              <p className="font-bold text-gray-800 line-clamp-2 leading-relaxed" title={p.name}>
-                                {p.name}
-                              </p>
-                              <p className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1">
-                                <MapPin className="w-3 h-3 text-gray-400" />
-                                <span>{p.location}</span>
-                              </p>
-                            </div>
-                          </td>
-                          <td className="py-3.5 px-4 font-mono font-bold text-gray-500">{p.id}</td>
-                          <td className="py-3.5 px-4">
-                            <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded font-medium">
-                              {categoryObj ? categoryObj.name : p.category}
-                            </span>
-                          </td>
-                          <td className="py-3.5 px-4 text-right">
-                            <div className="font-bold text-gray-800">
+                          </div>
+                        </div>
+
+                        {/* Financials & Stock stats */}
+                        <div className="grid grid-cols-3 gap-2 bg-gray-50 p-2.5 rounded-lg border border-gray-100/50 text-[10px]">
+                          <div className="space-y-0.5">
+                            <span className="text-gray-400 block font-medium">Giá bán:</span>
+                            <span className="font-bold text-emerald-600 block">
                               {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price)}
-                            </div>
-                            {p.originalPrice && (
-                              <div className="text-[10px] text-gray-400 line-through">
-                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.originalPrice)}
-                              </div>
-                            )}
-                          </td>
-                          <td className="py-3.5 px-4 text-center">
-                            <span className={`font-bold ${p.stock <= 5 ? 'text-red-500 bg-red-50 px-1.5 py-0.5 rounded' : 'text-gray-700'}`}>
+                            </span>
+                          </div>
+                          <div className="space-y-0.5">
+                            <span className="text-gray-400 block font-medium">Tồn kho:</span>
+                            <span className={`font-bold block ${p.stock <= 5 ? 'text-red-500' : 'text-gray-700'}`}>
                               {p.stock}
                             </span>
-                          </td>
-                          <td className="py-3.5 px-4 text-center font-medium text-gray-500">{p.sold}</td>
-                          <td className="py-3.5 px-4 text-center">
-                            <div className="flex flex-col gap-1 items-center">
-                              {p.isMall && (
-                                <span className="bg-[#047857] text-white font-black text-[8px] uppercase px-1 rounded-sm leading-none py-0.5">
-                                  Mall
-                                </span>
+                          </div>
+                          <div className="space-y-0.5">
+                            <span className="text-gray-400 block font-medium">Đã bán:</span>
+                            <span className="font-bold text-gray-700 block">{p.sold}</span>
+                          </div>
+                        </div>
+
+                        {/* Badges & Actions row */}
+                        <div className="flex items-center justify-between gap-2 pt-1">
+                          {/* Featured Badges */}
+                          <div className="flex flex-wrap gap-1">
+                            {p.isMall && (
+                              <span className="bg-[#047857] text-white font-black text-[7px] uppercase px-1 rounded-sm leading-none py-0.5">
+                                Mall
+                              </span>
+                            )}
+                            {p.isFavorite && (
+                              <span className="bg-orange-500 text-white font-black text-[7px] uppercase px-1 rounded-sm leading-none py-0.5">
+                                Yêu Thích
+                              </span>
+                            )}
+                            {p.isFlashSale && (
+                              <span className="bg-red-500 text-white font-black text-[7px] uppercase px-1 rounded-sm leading-none py-0.5">
+                                Săn Deal
+                              </span>
+                            )}
+                            {p.isBestSeller && (
+                              <span className="bg-amber-500 text-white font-black text-[7px] uppercase px-1 rounded-sm leading-none py-0.5">
+                                Bán Chạy
+                              </span>
+                            )}
+                            {p.isOnSale && (
+                              <span className="bg-rose-500 text-white font-black text-[7px] uppercase px-1 rounded-sm leading-none py-0.5">
+                                Giảm Giá
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => openEditProduct(p)}
+                              className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer flex items-center gap-1 font-bold text-[10px]"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                              <span>Sửa</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteProduct(p.id, p.name)}
+                              className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors cursor-pointer flex items-center gap-1 font-bold text-[10px]"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Xóa</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Desktop Table Layout */}
+              <div className="hidden md:block">
+                <table className="w-full text-left border-collapse min-w-[800px]">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-100 text-xs text-gray-500 font-bold uppercase tracking-wider">
+                      <th className="py-3 px-4">Sản Phẩm</th>
+                      <th className="py-3 px-4 w-32">Mã SP</th>
+                      <th className="py-3 px-4 w-36">Danh Mục</th>
+                      <th className="py-3 px-4 w-28 text-right">Giá Bán</th>
+                      <th className="py-3 px-4 w-28 text-center">Tồn Kho</th>
+                      <th className="py-3 px-4 w-24 text-center">Đã Bán</th>
+                      <th className="py-3 px-4 w-28 text-center">Nhãn Đặc Trưng</th>
+                      <th className="py-3 px-4 w-28 text-center">Thao Tác</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 text-xs text-gray-700">
+                    {adminFilteredProducts.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="py-12 text-center text-gray-400">
+                          <AlertCircle className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                          <p className="font-semibold">Không tìm thấy sản phẩm nào phù hợp</p>
+                          <p className="text-[10px] text-gray-400 mt-0.5">Vui lòng thử điều chỉnh lại bộ lọc tìm kiếm của bạn.</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      adminFilteredProducts.map((p) => {
+                        const categoryObj = categories.find(c => c.id === p.category);
+                        return (
+                          <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="py-3.5 px-4 flex items-center space-x-3">
+                              <div className="w-12 h-12 rounded border border-gray-100 overflow-hidden shrink-0 bg-gray-50">
+                                <img src={p.image} alt={p.name} className="w-full h-full object-cover" onError={(e) => { (e.target as any).src = 'https://placehold.co/150?text=Error'; }} referrerPolicy="no-referrer" />
+                              </div>
+                              <div className="min-w-0 max-w-[280px]">
+                                <p className="font-bold text-gray-800 line-clamp-2 leading-relaxed" title={p.name}>
+                                  {p.name}
+                                </p>
+                                <p className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1">
+                                  <MapPin className="w-3 h-3 text-gray-400" />
+                                  <span>{p.location}</span>
+                                </p>
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-4 font-mono font-bold text-gray-500">{p.id}</td>
+                            <td className="py-3.5 px-4">
+                              <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded font-medium">
+                                {categoryObj ? categoryObj.name : p.category}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-4 text-right">
+                              <div className="font-bold text-gray-800">
+                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price)}
+                              </div>
+                              {p.originalPrice && (
+                                <div className="text-[10px] text-gray-400 line-through">
+                                  {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.originalPrice)}
+                                </div>
                               )}
-                              {p.isFavorite && (
-                                <span className="bg-orange-500 text-white font-black text-[8px] uppercase px-1 rounded-sm leading-none py-0.5">
-                                  Yêu Thích
-                                </span>
-                              )}
-                              {p.isFlashSale && (
-                                <span className="bg-red-500 text-white font-black text-[8px] uppercase px-1 rounded-sm leading-none py-0.5">
-                                  Săn Deal
-                                </span>
-                              )}
-                              {p.isBestSeller && (
-                                <span className="bg-amber-500 text-white font-black text-[8px] uppercase px-1 rounded-sm leading-none py-0.5">
-                                  Bán Chạy
-                                </span>
-                              )}
-                              {p.isOnSale && (
-                                <span className="bg-rose-500 text-white font-black text-[8px] uppercase px-1 rounded-sm leading-none py-0.5">
-                                  Giảm Giá
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-3.5 px-4 text-center">
-                            <div className="flex items-center justify-center space-x-1.5">
-                              <button
-                                onClick={() => openEditProduct(p)}
-                                title="Chỉnh sửa sản phẩm"
-                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteProduct(p.id, p.name)}
-                                title="Xóa sản phẩm"
-                                className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+                            </td>
+                            <td className="py-3.5 px-4 text-center">
+                              <span className={`font-bold ${p.stock <= 5 ? 'text-red-500 bg-red-50 px-1.5 py-0.5 rounded' : 'text-gray-700'}`}>
+                                {p.stock}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-4 text-center font-medium text-gray-500">{p.sold}</td>
+                            <td className="py-3.5 px-4 text-center">
+                              <div className="flex flex-col gap-1 items-center">
+                                {p.isMall && (
+                                  <span className="bg-[#047857] text-white font-black text-[8px] uppercase px-1 rounded-sm leading-none py-0.5">
+                                    Mall
+                                  </span>
+                                )}
+                                {p.isFavorite && (
+                                  <span className="bg-orange-500 text-white font-black text-[8px] uppercase px-1 rounded-sm leading-none py-0.5">
+                                    Yêu Thích
+                                  </span>
+                                )}
+                                {p.isFlashSale && (
+                                  <span className="bg-red-500 text-white font-black text-[8px] uppercase px-1 rounded-sm leading-none py-0.5">
+                                    Săn Deal
+                                  </span>
+                                )}
+                                {p.isBestSeller && (
+                                  <span className="bg-amber-500 text-white font-black text-[8px] uppercase px-1 rounded-sm leading-none py-0.5">
+                                    Bán Chạy
+                                  </span>
+                                )}
+                                {p.isOnSale && (
+                                  <span className="bg-rose-500 text-white font-black text-[8px] uppercase px-1 rounded-sm leading-none py-0.5">
+                                    Giảm Giá
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-4 text-center">
+                              <div className="flex items-center justify-center space-x-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => openEditProduct(p)}
+                                  title="Chỉnh sửa sản phẩm"
+                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteProduct(p.id, p.name)}
+                                  title="Xóa sản phẩm"
+                                  className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -708,54 +972,54 @@ export const AdminPanel: React.FC = () => {
         {activeSubTab === 'orders' && (
           <div className="p-4 sm:p-6 space-y-6 animate-fade-in">
             {/* Stats Overview */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl flex items-center justify-between">
-                <div>
-                  <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider">Doanh Thu (Thực thu)</p>
-                  <p className="text-emerald-700 text-lg sm:text-xl font-extrabold mt-1">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="bg-emerald-50 border border-emerald-100 p-3 sm:p-4 rounded-xl flex items-center justify-between min-w-0">
+                <div className="min-w-0">
+                  <p className="text-gray-500 text-[9px] sm:text-[11px] font-bold uppercase tracking-wider truncate">Doanh Thu (Thực thu)</p>
+                  <p className="text-emerald-700 text-sm sm:text-lg md:text-xl font-extrabold mt-1 truncate">
                     {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
                       orders.filter(o => o.status === 'completed').reduce((sum, o) => sum + o.finalAmount, 0)
                     )}
                   </p>
                 </div>
-                <div className="bg-emerald-500/10 p-2.5 rounded-lg text-emerald-600">
-                  <Coins className="w-6 h-6" />
+                <div className="bg-emerald-500/10 p-2 rounded-lg text-emerald-600 shrink-0 ml-1">
+                  <Coins className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
               </div>
 
-              <div className="bg-amber-50 border border-amber-100 p-4 rounded-xl flex items-center justify-between">
-                <div>
-                  <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider">Đơn Chờ Xác Nhận</p>
-                  <p className="text-amber-700 text-lg sm:text-xl font-extrabold mt-1">
+              <div className="bg-amber-50 border border-amber-100 p-3 sm:p-4 rounded-xl flex items-center justify-between min-w-0">
+                <div className="min-w-0">
+                  <p className="text-gray-500 text-[9px] sm:text-[11px] font-bold uppercase tracking-wider truncate">Đơn Chờ Xác Nhận</p>
+                  <p className="text-amber-700 text-sm sm:text-lg md:text-xl font-extrabold mt-1 truncate">
                     {orders.filter(o => o.status === 'pending').length} đơn
                   </p>
                 </div>
-                <div className="bg-amber-500/10 p-2.5 rounded-lg text-amber-600">
-                  <AlertCircle className="w-6 h-6 animate-pulse" />
+                <div className="bg-amber-500/10 p-2 rounded-lg text-amber-600 shrink-0 ml-1">
+                  <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 animate-pulse" />
                 </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-center justify-between">
-                <div>
-                  <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider">Đơn Đang Giao</p>
-                  <p className="text-blue-700 text-lg sm:text-xl font-extrabold mt-1">
+              <div className="bg-blue-50 border border-blue-100 p-3 sm:p-4 rounded-xl flex items-center justify-between min-w-0">
+                <div className="min-w-0">
+                  <p className="text-gray-500 text-[9px] sm:text-[11px] font-bold uppercase tracking-wider truncate">Đơn Đang Giao</p>
+                  <p className="text-blue-700 text-sm sm:text-lg md:text-xl font-extrabold mt-1 truncate">
                     {orders.filter(o => o.status === 'shipping').length} đơn
                   </p>
                 </div>
-                <div className="bg-blue-500/10 p-2.5 rounded-lg text-blue-600">
-                  <Package className="w-6 h-6" />
+                <div className="bg-blue-500/10 p-2 rounded-lg text-blue-600 shrink-0 ml-1">
+                  <Package className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
               </div>
 
-              <div className="bg-gray-50 border border-gray-200/60 p-4 rounded-xl flex items-center justify-between">
-                <div>
-                  <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider">Tổng Đơn Hàng</p>
-                  <p className="text-gray-700 text-lg sm:text-xl font-extrabold mt-1">
+              <div className="bg-gray-50 border border-gray-200/60 p-3 sm:p-4 rounded-xl flex items-center justify-between min-w-0">
+                <div className="min-w-0">
+                  <p className="text-gray-500 text-[9px] sm:text-[11px] font-bold uppercase tracking-wider truncate">Tổng Đơn Hàng</p>
+                  <p className="text-gray-700 text-sm sm:text-lg md:text-xl font-extrabold mt-1 truncate">
                     {orders.length} đơn
                   </p>
                 </div>
-                <div className="bg-gray-500/10 p-2.5 rounded-lg text-gray-600">
-                  <ShoppingBag className="w-6 h-6" />
+                <div className="bg-gray-500/10 p-2 rounded-lg text-gray-600 shrink-0 ml-1">
+                  <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
               </div>
             </div>
@@ -765,11 +1029,11 @@ export const AdminPanel: React.FC = () => {
               {/* Status Filter Tabs */}
               <div className="flex flex-wrap gap-1.5">
                 {[
-                  { id: 'all', label: 'Tất cả' },
-                  { id: 'pending', label: 'Chờ xác nhận' },
-                  { id: 'shipping', label: 'Đang giao' },
-                  { id: 'completed', label: 'Đã hoàn thành' },
-                  { id: 'cancelled', label: 'Đã hủy' }
+                  { id: 'all', label: 'Tất cả', icon: <ShoppingBag className="w-3.5 h-3.5 shrink-0" /> },
+                  { id: 'pending', label: 'Chờ xác nhận', icon: <Clock className="w-3.5 h-3.5 shrink-0" /> },
+                  { id: 'shipping', label: 'Đang giao', icon: <Truck className="w-3.5 h-3.5 shrink-0" /> },
+                  { id: 'completed', label: 'Đã hoàn thành', icon: <CheckCircle className="w-3.5 h-3.5 shrink-0" /> },
+                  { id: 'cancelled', label: 'Đã hủy', icon: <XCircle className="w-3.5 h-3.5 shrink-0" /> }
                 ].map((tab) => {
                   const count = tab.id === 'all' 
                     ? orders.length 
@@ -779,13 +1043,21 @@ export const AdminPanel: React.FC = () => {
                     <button
                       key={tab.id}
                       onClick={() => setOrderStatusFilter(tab.id as any)}
-                      className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
+                      className={`px-2.5 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 ${
                         isActive 
                           ? 'bg-[#059669] text-white shadow-sm' 
                           : 'bg-white text-gray-500 hover:text-gray-700 border border-gray-200'
                       }`}
                     >
-                      {tab.label} ({count})
+                      {tab.icon}
+                      <span className="hidden min-[480px]:inline">{tab.label}</span>
+                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ml-0.5 ${
+                        isActive 
+                          ? 'bg-emerald-700/50 text-white' 
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {count}
+                      </span>
                     </button>
                   );
                 })}
@@ -835,49 +1107,55 @@ export const AdminPanel: React.FC = () => {
                     <div key={o.id} className="bg-white border border-gray-100 rounded-xl shadow-xs overflow-hidden transition-all hover:shadow-sm">
                       {/* Card Header Summary */}
                       <div className="p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-gray-50/50 border-b border-gray-100">
-                        <div className="flex flex-wrap items-center gap-2.5">
-                          <span className="font-mono text-xs font-bold text-[#059669] bg-emerald-50 px-2.5 py-1 rounded">
+                        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                          <span className="font-mono text-xs font-extrabold text-[#059669] bg-emerald-50 px-2.5 py-1 rounded shrink-0">
                             {o.id}
                           </span>
-                          <span className="text-xs text-gray-400 font-medium">
-                            Ngày đặt: {o.date}
+                          <span className="text-[11px] sm:text-xs text-gray-500 font-medium flex items-center gap-1 bg-white border border-gray-100 px-2 py-1 rounded shadow-2xs shrink-0">
+                            <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                            <span>{o.date}</span>
                           </span>
-                          <span className="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                            {totalItemsCount} sản phẩm
+                          <span className="text-[11px] sm:text-xs font-bold text-gray-600 bg-gray-100 px-2.5 py-1 rounded flex items-center gap-1 shrink-0">
+                            <Package className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                            <span>{totalItemsCount} <span className="hidden min-[480px]:inline">sản phẩm</span></span>
                           </span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {o.status === 'pending' && (
-                            <span className="bg-amber-100 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                              Chờ xác nhận
-                            </span>
-                          )}
-                          {o.status === 'shipping' && (
-                            <span className="bg-blue-100 text-blue-800 border border-blue-200 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                              Đang giao hàng
-                            </span>
-                          )}
-                          {o.status === 'completed' && (
-                            <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                              Đã hoàn thành
-                            </span>
-                          )}
-                          {o.status === 'cancelled' && (
-                            <span className="bg-rose-100 text-rose-800 border border-rose-200 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                              Đã hủy đơn
-                            </span>
-                          )}
+                        <div className="flex items-center justify-between w-full sm:w-auto gap-2">
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {o.status === 'pending' && (
+                              <span className="bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold flex items-center gap-1">
+                                <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-500 animate-pulse" />
+                                <span>Chờ xác nhận</span>
+                              </span>
+                            )}
+                            {o.status === 'shipping' && (
+                              <span className="bg-blue-50 text-blue-800 border border-blue-200 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold flex items-center gap-1">
+                                <Truck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-500" />
+                                <span>Đang giao</span>
+                              </span>
+                            )}
+                            {o.status === 'completed' && (
+                              <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold flex items-center gap-1">
+                                <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-500" />
+                                <span>Hoàn thành</span>
+                              </span>
+                            )}
+                            {o.status === 'cancelled' && (
+                              <span className="bg-rose-50 text-rose-800 border border-rose-200 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold flex items-center gap-1">
+                                <XCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-rose-500" />
+                                <span>Đã hủy</span>
+                              </span>
+                            )}
+                          </div>
 
                           <button
+                            type="button"
                             onClick={() => setExpandedOrderId(isExpanded ? null : o.id)}
-                            className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors cursor-pointer text-xs font-bold flex items-center gap-1 ml-2"
+                            className="p-1 px-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded border border-gray-200 bg-white shadow-2xs transition-colors cursor-pointer text-[11px] sm:text-xs font-bold flex items-center gap-1 ml-auto"
                           >
-                            <Eye className="w-4 h-4" />
-                            <span>{isExpanded ? 'Thu gọn' : 'Xem chi tiết'}</span>
+                            <Eye className="w-3.5 h-3.5 shrink-0" />
+                            <span className="hidden min-[480px]:inline">{isExpanded ? 'Thu gọn' : 'Xem chi tiết'}</span>
+                            <span className="inline min-[480px]:hidden">{isExpanded ? 'Thu gọn' : 'Chi tiết'}</span>
                           </button>
                         </div>
                       </div>
@@ -886,12 +1164,23 @@ export const AdminPanel: React.FC = () => {
                       <div className="p-4 sm:p-5 space-y-4">
                         {/* Quick Recipient summary when collapsed */}
                         {!isExpanded && (
-                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs">
-                            <div>
-                              <strong className="text-gray-700">Khách hàng:</strong> {o.shippingAddress.fullName} - {o.shippingAddress.phone}
+                          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 text-xs bg-gray-50/50 p-3 rounded-lg border border-gray-100/60">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-1.5 text-gray-600">
+                                <UserRound className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                <span className="font-bold text-gray-800">{o.shippingAddress.fullName}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-gray-500">
+                                <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                <span>{o.shippingAddress.phone}</span>
+                              </div>
                             </div>
-                            <div className="font-bold text-gray-800 text-sm">
-                              Tổng thanh toán: <span className="text-emerald-600">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(o.finalAmount)}</span>
+                            <div className="flex items-center justify-between sm:justify-end gap-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-gray-100">
+                              <span className="text-gray-400 font-medium">Thành tiền:</span>
+                              <span className="font-extrabold text-sm text-[#059669] flex items-center gap-1">
+                                <Coins className="w-4 h-4 text-[#059669]/80 shrink-0" />
+                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(o.finalAmount)}
+                              </span>
                             </div>
                           </div>
                         )}
@@ -901,8 +1190,9 @@ export const AdminPanel: React.FC = () => {
                           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in text-xs leading-relaxed">
                             {/* Products Column */}
                             <div className="lg:col-span-2 space-y-3">
-                              <h4 className="font-bold text-gray-700 border-b border-gray-100 pb-2 flex items-center gap-1 text-[11px] uppercase tracking-wider">
-                                Danh Sách Sản Phẩm Đã Mua
+                              <h4 className="font-bold text-gray-700 border-b border-gray-100 pb-2 flex items-center gap-1.5 text-[11px] uppercase tracking-wider">
+                                <Package className="w-4 h-4 text-emerald-600 shrink-0" />
+                                <span>Danh Sách Sản Phẩm Đã Mua</span>
                               </h4>
                               <div className="divide-y divide-gray-50 max-h-80 overflow-y-auto pr-1">
                                 {o.items.map((item, idx) => (
@@ -935,44 +1225,65 @@ export const AdminPanel: React.FC = () => {
                             </div>
 
                             {/* Recipient & Payment info Column */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 space-y-4">
+                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-4">
                               <div>
-                                <h4 className="font-bold text-gray-700 border-b border-gray-200 pb-1.5 flex items-center gap-1 text-[11px] uppercase tracking-wider mb-2">
-                                  Thông Tin Giao Hàng
+                                <h4 className="font-bold text-gray-700 border-b border-gray-200 pb-1.5 flex items-center gap-1.5 text-[11px] uppercase tracking-wider mb-2.5">
+                                  <UserRound className="w-3.5 h-3.5 text-[#059669] shrink-0" />
+                                  <span>Thông Tin Giao Hàng</span>
                                 </h4>
-                                <ul className="space-y-1 text-gray-600 text-[11px]">
-                                  <li><strong>Họ tên:</strong> {o.shippingAddress.fullName}</li>
-                                  <li><strong>Số điện thoại:</strong> {o.shippingAddress.phone}</li>
-                                  <li className="break-words">
-                                    <strong>Địa chỉ:</strong> {o.shippingAddress.street}, {o.shippingAddress.ward}, {o.shippingAddress.district}, {o.shippingAddress.city}
+                                <ul className="space-y-2 text-gray-600 text-[11px]">
+                                  <li className="flex items-center gap-1.5">
+                                    <UserRound className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                    <span><strong className="text-gray-700">Họ tên:</strong> {o.shippingAddress.fullName}</span>
+                                  </li>
+                                  <li className="flex items-center gap-1.5">
+                                    <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                    <span><strong className="text-gray-700">SĐT:</strong> {o.shippingAddress.phone}</span>
+                                  </li>
+                                  <li className="flex items-start gap-1.5">
+                                    <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5" />
+                                    <span className="break-words">
+                                      <strong className="text-gray-700">Địa chỉ:</strong> {o.shippingAddress.street}, {o.shippingAddress.ward}, {o.shippingAddress.district}, {o.shippingAddress.city}
+                                    </span>
                                   </li>
                                 </ul>
                               </div>
 
                               <div>
-                                <h4 className="font-bold text-gray-700 border-b border-gray-200 pb-1.5 flex items-center gap-1 text-[11px] uppercase tracking-wider mb-2">
-                                  Vận Chuyển & Thanh Toán
+                                <h4 className="font-bold text-gray-700 border-b border-gray-200 pb-1.5 flex items-center gap-1.5 text-[11px] uppercase tracking-wider mb-2.5">
+                                  <Truck className="w-3.5 h-3.5 text-[#059669] shrink-0" />
+                                  <span>Vận Chuyển & Thanh Toán</span>
                                 </h4>
-                                <ul className="space-y-1 text-gray-600 text-[11px]">
-                                  <li>
-                                    <strong>Vận chuyển:</strong> {o.shippingMethod === 'express' ? 'Hỏa tốc' : o.shippingMethod === 'saver' ? 'Tiết kiệm' : 'Tiêu chuẩn'} 
-                                    <span className="text-gray-400 ml-1">({new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(o.shippingFee)})</span>
+                                <ul className="space-y-2 text-gray-600 text-[11px]">
+                                  <li className="flex items-center gap-1.5">
+                                    <Truck className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                    <span>
+                                      <strong className="text-gray-700">Vận chuyển:</strong> {o.shippingMethod === 'express' ? 'Hỏa tốc' : o.shippingMethod === 'saver' ? 'Tiết kiệm' : 'Tiêu chuẩn'} 
+                                      <span className="text-gray-400 ml-1">({new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(o.shippingFee)})</span>
+                                    </span>
                                   </li>
-                                  <li>
-                                    <strong>Thanh toán:</strong> {o.paymentMethod === 'bank_transfer' ? 'Chuyển khoản ngân hàng' : 'Thanh toán COD'}
+                                  <li className="flex items-center gap-1.5">
+                                    <Coins className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                    <span>
+                                      <strong className="text-gray-700">Thanh toán:</strong> {o.paymentMethod === 'bank_transfer' ? 'Chuyển khoản' : 'Thanh toán COD'}
+                                    </span>
                                   </li>
                                   {o.voucherCode && (
-                                    <li>
-                                      <strong>Mã giảm giá:</strong> <span className="text-emerald-600 font-bold bg-emerald-50 px-1 rounded">{o.voucherCode}</span> 
-                                      <span className="text-red-500 font-semibold ml-1">(-{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(o.discountAmount)})</span>
+                                    <li className="flex items-center gap-1.5">
+                                      <Tag className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                                      <span>
+                                        <strong className="text-gray-700">Mã voucher:</strong> <span className="text-[#059669] font-bold bg-emerald-50 px-1 rounded">{o.voucherCode}</span> 
+                                        <span className="text-red-500 font-semibold ml-1">(-{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(o.discountAmount)})</span>
+                                      </span>
                                     </li>
                                   )}
                                 </ul>
                               </div>
 
-                              <div className="pt-2 border-t border-gray-200 text-right">
-                                <span className="text-[10px] text-gray-400 block uppercase font-bold">Tổng thanh toán:</span>
-                                <span className="text-base font-extrabold text-[#059669]">
+                              <div className="pt-2.5 border-t border-gray-200 text-right">
+                                <span className="text-[10px] text-gray-400 block uppercase font-bold mb-0.5">Tổng thanh toán:</span>
+                                <span className="text-base font-extrabold text-[#059669] flex items-center justify-end gap-1">
+                                  <Coins className="w-4.5 h-4.5 text-[#059669] shrink-0" />
                                   {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(o.finalAmount)}
                                 </span>
                               </div>
@@ -986,7 +1297,7 @@ export const AdminPanel: React.FC = () => {
                             * Vui lòng liên lạc và xử lý đóng gói hàng hóa trước khi bàn giao cho đơn vị vận chuyển.
                           </div>
                           
-                          <div className="flex items-center gap-2 justify-end">
+                          <div className="flex flex-wrap items-center gap-2 justify-end w-full sm:w-auto">
                             {/* Pending State actions */}
                             {o.status === 'pending' && (
                               <>
@@ -999,9 +1310,10 @@ export const AdminPanel: React.FC = () => {
                                       () => updateOrderStatus(o.id, 'shipping')
                                     );
                                   }}
-                                  className="px-4 py-2 bg-[#059669] hover:bg-[#047857] text-white rounded font-bold text-xs uppercase tracking-wider shadow-sm transition-all cursor-pointer"
+                                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-[#059669] hover:bg-[#047857] text-white rounded-lg font-bold text-xs uppercase tracking-wide shadow-sm transition-all cursor-pointer w-full sm:w-auto min-h-[38px]"
                                 >
-                                  Xác nhận gửi hàng
+                                  <Truck className="w-4 h-4 shrink-0" />
+                                  <span>Xác nhận gửi hàng</span>
                                 </button>
                                 <button
                                   type="button"
@@ -1012,9 +1324,10 @@ export const AdminPanel: React.FC = () => {
                                       () => updateOrderStatus(o.id, 'cancelled')
                                     );
                                   }}
-                                  className="px-4 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
+                                  className="flex items-center justify-center gap-1.5 px-3 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded-lg font-bold text-xs uppercase tracking-wide transition-all cursor-pointer w-full sm:w-auto min-h-[38px]"
                                 >
-                                  Hủy đơn hàng
+                                  <XCircle className="w-4 h-4 shrink-0" />
+                                  <span>Hủy đơn</span>
                                 </button>
                               </>
                             )}
@@ -1031,9 +1344,10 @@ export const AdminPanel: React.FC = () => {
                                       () => updateOrderStatus(o.id, 'completed')
                                     );
                                   }}
-                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs uppercase tracking-wider shadow-sm transition-all cursor-pointer"
+                                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs uppercase tracking-wide shadow-sm transition-all cursor-pointer w-full sm:w-auto min-h-[38px]"
                                 >
-                                  Giao thành công
+                                  <CheckCircle className="w-4 h-4 shrink-0" />
+                                  <span>Giao thành công</span>
                                 </button>
                                 <button
                                   type="button"
@@ -1044,9 +1358,10 @@ export const AdminPanel: React.FC = () => {
                                       () => updateOrderStatus(o.id, 'cancelled')
                                     );
                                   }}
-                                  className="px-4 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
+                                  className="flex items-center justify-center gap-1.5 px-3 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded-lg font-bold text-xs uppercase tracking-wide transition-all cursor-pointer w-full sm:w-auto min-h-[38px]"
                                 >
-                                  Giao thất bại / Hủy
+                                  <XCircle className="w-4 h-4 shrink-0" />
+                                  <span>Giao thất bại / Hủy</span>
                                 </button>
                               </>
                             )}
@@ -1065,6 +1380,87 @@ export const AdminPanel: React.FC = () => {
                 })
               )}
             </div>
+          </div>
+        )}
+
+        {/* TAB 4: REGISTERED CUSTOMERS (WEB SERVER DATA) */}
+        {activeSubTab === 'users' && (
+          <div className="p-4 sm:p-6 space-y-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-emerald-50/60 p-4 rounded-xl border border-emerald-100">
+              <div>
+                <h3 className="font-extrabold text-gray-800 text-sm flex items-center gap-2">
+                  <Users className="w-4 h-4 text-[#059669]" />
+                  <span>Danh Sách Khách Hàng Đã Đăng Ký (Lưu tại Web Server)</span>
+                </h3>
+                <p className="text-gray-500 text-xs mt-0.5">
+                  Dữ liệu tài khoản khách hàng đăng ký trực tuyến được lưu trữ an toàn trong tập tin cơ sở dữ liệu web server (`data/server-db.json`).
+                </p>
+              </div>
+              <div className="bg-white px-3 py-1.5 rounded-lg border border-emerald-200 text-emerald-800 text-xs font-bold shrink-0">
+                Tổng cộng: {usersList.length} Tài khoản
+              </div>
+            </div>
+
+            {usersLoading ? (
+              <div className="text-center py-12 text-gray-400 text-xs animate-pulse">
+                Đang tải danh sách tài khoản từ Web Server...
+              </div>
+            ) : usersList.length === 0 ? (
+              <div className="text-center py-12 bg-gray-50 border border-dashed border-gray-200 rounded-xl">
+                <Users className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                <p className="text-xs font-bold text-gray-500">Chưa có tài khoản khách hàng nào đăng ký.</p>
+              </div>
+            ) : (
+              <div className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-xs">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs text-gray-700">
+                    <thead className="bg-gray-50 text-gray-500 font-bold border-b border-gray-100 uppercase text-[10px] tracking-wider">
+                      <tr>
+                        <th className="px-4 py-3">Khách hàng</th>
+                        <th className="px-4 py-3">Email</th>
+                        <th className="px-4 py-3">Vai trò</th>
+                        <th className="px-4 py-3">Ngày tạo tài khoản</th>
+                        <th className="px-4 py-3 text-right">Trạng thái</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {usersList.map((u) => (
+                        <tr key={u.id} className="hover:bg-gray-50/80 transition-colors">
+                          <td className="px-4 py-3 font-bold text-gray-900 flex items-center gap-2.5">
+                            {u.avatar ? (
+                              <img src={u.avatar} alt="" className="w-7 h-7 rounded-full object-cover border border-gray-200" />
+                            ) : (
+                              <div className="w-7 h-7 rounded-full bg-emerald-100 text-[#059669] flex items-center justify-center font-black">
+                                {u.name ? u.name.charAt(0) : 'U'}
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-bold text-gray-900">{u.name}</p>
+                              <p className="text-[10px] text-gray-400 font-mono">ID: {u.id}</p>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 font-medium text-gray-600">{u.email}</td>
+                          <td className="px-4 py-3">
+                            {u.role === 'admin' ? (
+                              <span className="bg-amber-100 text-amber-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Admin</span>
+                            ) : (
+                              <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Khách Hàng</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-gray-500">{u.createdAt || 'Mặc định'}</td>
+                          <td className="px-4 py-3 text-right">
+                            <span className="inline-flex items-center gap-1 text-emerald-600 text-[10px] font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                              Hoạt động
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
