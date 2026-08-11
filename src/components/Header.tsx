@@ -53,60 +53,69 @@ export const Header: React.FC = () => {
 
   return (
     <header className="bg-gradient-to-b from-[#059669] to-[#047857] text-white text-xs sticky top-0 z-50 shadow-md">
-      {/* Top Navbar */}
-      <div className="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center border-b border-white/10">
-        <div className="flex items-center space-x-4">
+      {/* Top Navbar - Icon Only / Icon Optimized */}
+      <div className="max-w-7xl mx-auto px-4 py-1.5 flex justify-between items-center border-b border-white/10 text-white">
+        {/* Left Side: Seller / Store channel icon */}
+        <div className="flex items-center space-x-2">
           <button 
+            type="button"
             onClick={() => setActiveTab('admin')}
-            className={`hover:opacity-80 cursor-pointer flex items-center space-x-1 px-1.5 py-0.5 rounded transition-all ${
-              activeTab === 'admin' ? 'bg-white/25 font-bold shadow-inner' : ''
+            title="Kênh Người Bán (Quản Lý)"
+            className={`p-1.5 rounded-lg hover:bg-white/20 transition-all cursor-pointer flex items-center justify-center ${
+              activeTab === 'admin' ? 'bg-white/25 ring-1 ring-white/40' : ''
             }`}
           >
-            <Store className="w-3.5 h-3.5" />
-            <span>Kênh Người Bán (Quản Lý)</span>
+            <Store className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <span className="hover:opacity-80 cursor-pointer flex items-center space-x-1">
-            <Bell className="w-3.5 h-3.5" />
-            <span>Thông Báo</span>
-          </span>
-          <span className="hover:opacity-80 cursor-pointer flex items-center space-x-1">
-            <Globe className="w-3.5 h-3.5" />
-            <span>Tiếng Việt</span>
-          </span>
-          <span className="w-[1px] h-3 bg-white/30"></span>
-          
+        {/* Right Side: Quick Action Icons */}
+        <div className="flex items-center space-x-2 sm:space-x-3">
           <button 
-            onClick={() => setActiveTab('orders')}
-            className={`hover:opacity-80 cursor-pointer flex items-center space-x-1 px-1.5 py-0.5 rounded ${activeTab === 'orders' ? 'bg-white/20' : ''}`}
+            type="button"
+            title="Thông Báo"
+            className="p-1.5 rounded-lg hover:bg-white/20 transition-all cursor-pointer flex items-center justify-center"
           >
-            <History className="w-3.5 h-3.5" />
-            <span className="font-medium">Lịch Sử Mua Hàng</span>
+            <Bell className="w-4 h-4" />
           </button>
-          
-          <span className="w-[1px] h-3 bg-white/30"></span>
-          
-          {/* User Account / Auth Section */}
+
+          <button 
+            type="button"
+            title="Ngôn Ngữ (Tiếng Việt)"
+            className="p-1.5 rounded-lg hover:bg-white/20 transition-all cursor-pointer flex items-center justify-center"
+          >
+            <Globe className="w-4 h-4" />
+          </button>
+
+          <span className="w-[1px] h-3.5 bg-white/30"></span>
+
+          <button 
+            type="button"
+            onClick={() => setActiveTab('orders')}
+            title="Lịch Sử Mua Hàng"
+            className={`p-1.5 rounded-lg hover:bg-white/20 transition-all cursor-pointer flex items-center justify-center ${
+              activeTab === 'orders' ? 'bg-white/25 ring-1 ring-white/40' : ''
+            }`}
+          >
+            <History className="w-4 h-4" />
+          </button>
+
+          <span className="w-[1px] h-3.5 bg-white/30"></span>
+
+          {/* User Account / Auth Icon */}
           {currentUser ? (
             <div className="relative group">
               <button 
                 type="button"
-                className="flex items-center space-x-1.5 hover:opacity-95 cursor-pointer bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded transition-all"
+                title={currentUser.name}
+                className="flex items-center space-x-1 p-1 rounded-lg hover:bg-white/20 transition-all cursor-pointer"
               >
                 {currentUser.avatar ? (
-                  <img src={currentUser.avatar} alt={currentUser.name} className="w-5 h-5 rounded-full object-cover border border-white/40" />
+                  <img src={currentUser.avatar} alt={currentUser.name} className="w-5 h-5 rounded-full object-cover border border-white/50" />
                 ) : (
                   <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                    <User className="w-3 h-3 text-white" />
+                    <User className="w-3.5 h-3.5 text-white" />
                   </div>
-                )}
-                <span className="font-bold max-w-[120px] truncate">{currentUser.name}</span>
-                {currentUser.role === 'admin' ? (
-                  <span className="bg-amber-400 text-amber-950 text-[9px] font-black px-1 rounded uppercase">Admin</span>
-                ) : (
-                  <span className="bg-emerald-300 text-emerald-950 text-[9px] font-bold px-1 rounded">Khách</span>
                 )}
               </button>
 
@@ -152,10 +161,10 @@ export const Header: React.FC = () => {
             <button
               type="button"
               onClick={() => setAuthModalOpen(true)}
-              className="flex items-center space-x-1.5 bg-white text-[#059669] hover:bg-emerald-50 px-2.5 py-0.5 rounded font-bold transition-all cursor-pointer shadow-sm text-xs"
+              title="Đăng Nhập / Đăng Ký"
+              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-all cursor-pointer flex items-center justify-center"
             >
-              <User className="w-3.5 h-3.5" />
-              <span>Đăng Nhập / Đăng Ký</span>
+              <User className="w-4 h-4" />
             </button>
           )}
         </div>
@@ -192,21 +201,6 @@ export const Header: React.FC = () => {
               <span className="hidden sm:inline">Tìm kiếm</span>
             </button>
           </form>
-
-          {/* Quick Search Tags */}
-          <div className="hidden md:flex items-center gap-2 mt-1.5 text-[10px] text-white/90 overflow-x-auto">
-            <span className="opacity-75 font-medium shrink-0">Xu hướng:</span>
-            {['Camera Wifi', 'Thẻ Nhớ 64GB', 'Sạc Dự Phòng 20000mAh', 'Cam Hành Trình', 'Tai Nghe'].map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => handleTagClick(tag)}
-                className="hover:underline opacity-95 hover:opacity-100 transition-all whitespace-nowrap cursor-pointer"
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Shopping Cart Icon with Badge */}

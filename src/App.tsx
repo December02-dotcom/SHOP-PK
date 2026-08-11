@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/Header';
-import { BannerCarousel } from './components/BannerCarousel';
 import { CategoryList } from './components/CategoryList';
 import { FlashSale } from './components/FlashSale';
 import { ProductCard } from './components/ProductCard';
@@ -29,7 +28,7 @@ const ShopContent: React.FC = () => {
     setSelectedCategory,
     searchQuery,
     setSearchQuery,
-    isAuthModalOpen,
+    authModalOpen,
     setAuthModalOpen
   } = useApp();
 
@@ -62,14 +61,11 @@ const ShopContent: React.FC = () => {
       {/* Main Container Views Switcher */}
       {activeTab === 'home' && (
         <main className="space-y-6">
-          {/* Top Promotional Banner Carousel */}
-          <BannerCarousel />
+          {/* Flash Sale Promo */}
+          <FlashSale />
 
           {/* Categories Grid */}
           <CategoryList />
-
-          {/* Flash Sale Promo */}
-          <FlashSale />
 
           {/* Today Discover Section */}
           <div className="max-w-7xl mx-auto px-4 mt-6">
@@ -172,7 +168,7 @@ const ShopContent: React.FC = () => {
 
       {/* Customer Login & Register Modal */}
       <AuthModal
-        isOpen={isAuthModalOpen}
+        isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
       />
 
