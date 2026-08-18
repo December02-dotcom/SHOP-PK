@@ -32,7 +32,7 @@ interface CheckoutModalProps {
 }
 
 export const CheckoutModal: React.FC<CheckoutModalProps> = ({ onClose }) => {
-  const { cart, activeVoucher, createOrder, setActiveTab, warehouse } = useApp();
+  const { cart, activeVoucher, createOrder, setActiveTab, warehouse, setActivePolicyModal } = useApp();
 
   // Prefilled address defaults for easy testing
   const [address, setAddress] = useState<ShippingAddress>({
@@ -795,10 +795,30 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ onClose }) => {
 
           {/* Place order trigger */}
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-[11px] text-gray-400 flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Bảo mật thông tin thanh toán & cam kết chính hãng 100%</span>
-            </p>
+            <div className="text-[11px] text-gray-500 space-y-0.5">
+              <p className="flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>Bảo mật thông tin & cam kết chính hãng 100%.</span>
+              </p>
+              <p className="text-[10px] text-gray-400">
+                Bằng việc bấm đặt hàng, bạn đồng ý với{' '}
+                <button
+                  type="button"
+                  onClick={() => setActivePolicyModal('sales')}
+                  className="text-emerald-700 font-bold hover:underline cursor-pointer"
+                >
+                  Chính sách bán hàng
+                </button>{' '}
+                và{' '}
+                <button
+                  type="button"
+                  onClick={() => setActivePolicyModal('shipping')}
+                  className="text-emerald-700 font-bold hover:underline cursor-pointer"
+                >
+                  Chính sách vận chuyển
+                </button>.
+              </p>
+            </div>
             <button
               type="submit"
               disabled={isSubmitting}

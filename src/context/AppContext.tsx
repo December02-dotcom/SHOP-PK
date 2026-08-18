@@ -34,6 +34,8 @@ interface AppContextType {
   createOrder: (address: ShippingAddress, shippingMethod: 'standard' | 'express' | 'saver', paymentMethod: 'cod' | 'bank_transfer') => Promise<Order>;
   selectedProduct: Product | null;
   setSelectedProduct: (product: Product | null) => void;
+  activePolicyModal: 'sales' | 'shipping' | 'warranty' | null;
+  setActivePolicyModal: (policy: 'sales' | 'shipping' | 'warranty' | null) => void;
   activeTab: 'home' | 'cart' | 'orders' | 'admin';
   setActiveTab: (tab: 'home' | 'cart' | 'orders' | 'admin') => void;
   chatOpen: boolean;
@@ -91,6 +93,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [activeVoucher, setActiveVoucher] = useState<Voucher | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [activePolicyModal, setActivePolicyModal] = useState<'sales' | 'shipping' | 'warranty' | null>(null);
   const [activeTab, setActiveTab] = useState<'home' | 'cart' | 'orders' | 'admin'>('home');
   
   // Chat state
@@ -592,6 +595,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         createOrder,
         selectedProduct,
         setSelectedProduct,
+        activePolicyModal,
+        setActivePolicyModal,
         activeTab,
         setActiveTab,
         chatOpen,

@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Product } from '../types';
 import { useApp } from '../context/AppContext';
-import { Star, MapPin, ShoppingCart, Check } from 'lucide-react';
+import { Star, MapPin, ShoppingCart } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { setSelectedProduct, addToCart } = useApp();
-  const [added, setAdded] = useState(false);
+  const { setSelectedProduct } = useApp();
 
   const formatVND = (value: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
@@ -22,12 +21,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     return `Đã bán ${sold}`;
   };
 
-  const handleQuickAdd = (e: React.MouseEvent) => {
+  const handleOpenDetail = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const defaultOpt = product.options && product.options.length > 0 ? product.options[0] : undefined;
-    addToCart(product, 1, defaultOpt);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1800);
+    setSelectedProduct(product);
   };
 
   return (
@@ -103,7 +99,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         </div>
 
-        {/* Footer Area: Price, Sold, Location & Quick Add */}
+        {/* Footer Area: Price, Sold, Location & Cart Icon (Click to open details) */}
         <div>
           <div className="flex items-center justify-between mt-1">
             <span className="text-[#059669] font-bold text-sm md:text-base">
@@ -127,18 +123,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               </div>
             </div>
 
-            {/* Quick Add Button */}
+            {/* View Product Details Button */}
             <button
               type="button"
-              onClick={handleQuickAdd}
-              title="Thêm nhanh vào giỏ hàng"
-              className={`p-1.5 rounded-full transition-all cursor-pointer flex items-center justify-center shrink-0 ${
-                added 
-                  ? 'bg-emerald-600 text-white scale-110' 
-                  : 'bg-emerald-50 hover:bg-[#059669] text-[#059669] hover:text-white'
-              }`}
+              onClick={handleOpenDetail}
+              title="Xem chi tiết sản phẩm"
+              className="p-1.5 rounded-full transition-all cursor-pointer flex items-center justify-center shrink-0 bg-emerald-50 hover:bg-[#059669] text-[#059669] hover:text-white"
             >
-              {added ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <ShoppingCart className="w-3.5 h-3.5" />}
+              <ShoppingCart className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>

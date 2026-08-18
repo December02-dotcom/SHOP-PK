@@ -178,6 +178,9 @@ export const PRESET_WAREHOUSES: { id: string; label: string; config: WarehouseCo
       expressBaseFee: 45000,
       saverBaseFee: 15000,
       freeShipThreshold: 500000,
+      salesPolicyUrl: 'https://docs.google.com/document/d/19pM4EwB2gQ8xR_XqgZ1T9C3v0yN4p7E9L5_EXAMPLE/preview',
+      shippingPolicyUrl: 'https://docs.google.com/document/d/18rT3VwA1kP7xQ_ZpfaY2T8B4xM5q6E8K4_EXAMPLE/preview',
+      warrantyPolicyUrl: 'https://docs.google.com/document/d/17sQ2UwZ9jO6wP_YoeaX1S7A3wL4p5D7J3_EXAMPLE/preview',
       bankAccounts: DEFAULT_BANK_ACCOUNTS
     }
   },
@@ -201,6 +204,9 @@ export const PRESET_WAREHOUSES: { id: string; label: string; config: WarehouseCo
       expressBaseFee: 42000,
       saverBaseFee: 15000,
       freeShipThreshold: 500000,
+      salesPolicyUrl: 'https://docs.google.com/document/d/19pM4EwB2gQ8xR_XqgZ1T9C3v0yN4p7E9L5_EXAMPLE/preview',
+      shippingPolicyUrl: 'https://docs.google.com/document/d/18rT3VwA1kP7xQ_ZpfaY2T8B4xM5q6E8K4_EXAMPLE/preview',
+      warrantyPolicyUrl: 'https://docs.google.com/document/d/17sQ2UwZ9jO6wP_YoeaX1S7A3wL4p5D7J3_EXAMPLE/preview',
       bankAccounts: DEFAULT_BANK_ACCOUNTS
     }
   },
@@ -224,6 +230,9 @@ export const PRESET_WAREHOUSES: { id: string; label: string; config: WarehouseCo
       expressBaseFee: 40000,
       saverBaseFee: 15000,
       freeShipThreshold: 500000,
+      salesPolicyUrl: 'https://docs.google.com/document/d/19pM4EwB2gQ8xR_XqgZ1T9C3v0yN4p7E9L5_EXAMPLE/preview',
+      shippingPolicyUrl: 'https://docs.google.com/document/d/18rT3VwA1kP7xQ_ZpfaY2T8B4xM5q6E8K4_EXAMPLE/preview',
+      warrantyPolicyUrl: 'https://docs.google.com/document/d/17sQ2UwZ9jO6wP_YoeaX1S7A3wL4p5D7J3_EXAMPLE/preview',
       bankAccounts: DEFAULT_BANK_ACCOUNTS
     }
   }

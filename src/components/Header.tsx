@@ -174,8 +174,13 @@ export const Header: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-4 md:py-5 flex items-center justify-between gap-4">
         {/* Shop Logo */}
         <div onClick={resetHome} className="flex items-center space-x-2 cursor-pointer select-none shrink-0">
-          <div className="bg-white text-[#059669] p-1.5 md:p-2 rounded-xl shadow-inner transform hover:scale-105 transition-all">
-            <ShoppingCart className="w-6 h-6 md:w-8 md:h-8 stroke-[2.5]" />
+          <div className="bg-white text-[#059669] p-1 md:p-1.5 rounded-xl shadow-inner transform hover:scale-105 transition-all">
+            <img 
+              src="https://genqrcode.com/embedded?style=5&inner_eye_style=1&outer_eye_style=4&logo=009949094d7bb4eb8963a416813fca0f&color=%232664a6FF&background_color=%23ffffffFF&inner_eye_color=%230965c8&outer_eye_color=%23145722&imageformat=svg&language=vn&frame_style=0&frame_text=&frame_text_icon_color=%238e4848&frame_text_icon=user-regular&frame_color=%23000000&frame_background_color=%23FFFFFF&frame_text_color=%23FFFFFF&invert_colors=false&gradient_style=1&gradient_color_start=%230b650d&gradient_color_end=%230470c3&gradient_start_offset=5&gradient_end_offset=95&stl_type=1&logo_remove_background=true&stl_size=100&stl_qr_height=1.5&stl_base_height=2&stl_include_stands=false&stl_qr_magnet_type=3&stl_qr_magnet_count=0&type=0&text=Ph%E1%BB%A5%20Ki%E1%BB%87n%20%C4%90i%E1%BB%87n%20T%E1%BB%AD%20-%20Camera%0A0706010948%0Apkdientu-camera.com%0Ashopee.vn%2Fphukien_dientu_camera&width=500&height=500&bordersize=2" 
+              alt="Logo PK ĐIỆN TỬ - CAMERA" 
+              className="w-8 h-8 md:w-10 md:h-10 object-contain rounded" 
+              referrerPolicy="no-referrer"
+            />
           </div>
           <div className="flex flex-col leading-none">
             <span className="text-base md:text-lg font-black tracking-wider uppercase">PK ĐIỆN TỬ - CAMERA</span>

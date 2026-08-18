@@ -86,6 +86,9 @@ export interface WarehouseConfig {
   saverBaseFee: number; // e.g. 16000 VND
   freeShipThreshold: number; // e.g. 500000 VND
   bankAccounts?: BankAccount[]; // Up to 3 payment bank accounts with QR codes
+  salesPolicyUrl?: string; // Google Drive link for Chính Sách Bán Hàng
+  shippingPolicyUrl?: string; // Google Drive link for Chính Sách Vận Chuyển
+  warrantyPolicyUrl?: string; // Google Drive link for Chính Sách Bảo Hành
 }
 
 export interface User {

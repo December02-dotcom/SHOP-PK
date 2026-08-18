@@ -16,47 +16,68 @@ import {
 import { useApp } from '../context/AppContext';
 
 export const Footer: React.FC = () => {
-  const { setActiveTab } = useApp();
+  const { setActiveTab, setActivePolicyModal } = useApp();
 
   return (
     <footer id="main-footer" className="bg-gray-950 text-gray-300 text-xs mt-16 border-t border-gray-800">
       {/* Upper Footer Benefits */}
       <div className="border-b border-gray-800 bg-gray-900/50 py-8">
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="flex items-center space-x-3">
+          <button
+            type="button"
+            onClick={() => setActivePolicyModal('shipping')}
+            className="flex items-center space-x-3 text-left hover:bg-gray-800/40 p-2 rounded-xl transition-all cursor-pointer"
+          >
             <div className="p-2.5 bg-emerald-500/10 text-emerald-500 rounded-lg shrink-0 border border-emerald-500/20">
               <Truck className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="font-bold text-sm text-white">GIAO HÀNG SIÊU TỐC</h4>
-              <p className="text-gray-400 text-[11px] mt-0.5">Đặt hàng nhận ngay trong vòng 2-4 ngày trên toàn quốc.</p>
+              <h4 className="font-bold text-sm text-white flex items-center gap-1.5">
+                <span>GIAO HÀNG SIÊU TỐC</span>
+              </h4>
+              <p className="text-gray-400 text-[11px] mt-0.5">Xem chính sách vận chuyển & cước phí 63 tỉnh.</p>
             </div>
-          </div>
-          <div className="flex items-center space-x-3">
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => setActivePolicyModal('sales')}
+            className="flex items-center space-x-3 text-left hover:bg-gray-800/40 p-2 rounded-xl transition-all cursor-pointer"
+          >
             <div className="p-2.5 bg-emerald-500/10 text-emerald-500 rounded-lg shrink-0 border border-emerald-500/20">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="font-bold text-sm text-white">100% CHÍNH HÃNG</h4>
-              <p className="text-gray-400 text-[11px] mt-0.5">Cam kết các thiết bị & phụ kiện camera chính hãng uy tín.</p>
+              <h4 className="font-bold text-sm text-white flex items-center gap-1.5">
+                <span>100% CHÍNH HÃNG</span>
+              </h4>
+              <p className="text-gray-400 text-[11px] mt-0.5">Cam kết chất lượng & nguồn gốc từ chính hãng.</p>
             </div>
-          </div>
-          <div className="flex items-center space-x-3">
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActivePolicyModal('warranty')}
+            className="flex items-center space-x-3 text-left hover:bg-gray-800/40 p-2 rounded-xl transition-all cursor-pointer"
+          >
             <div className="p-2.5 bg-emerald-500/10 text-emerald-500 rounded-lg shrink-0 border border-emerald-500/20">
               <RotateCcw className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="font-bold text-sm text-white">7 NGÀY ĐỔI TRẢ</h4>
-              <p className="text-gray-400 text-[11px] mt-0.5">Bảo hành lỗi 1 đổi 1 nhanh chóng nếu có lỗi nhà sản xuất.</p>
+              <h4 className="font-bold text-sm text-white flex items-center gap-1.5">
+                <span>7 NGÀY ĐỔI TRẢ</span>
+              </h4>
+              <p className="text-gray-400 text-[11px] mt-0.5">Lỗi 1 đổi 1 nhanh chóng theo quy định bảo hành.</p>
             </div>
-          </div>
-          <div className="flex items-center space-x-3">
+          </button>
+
+          <div className="flex items-center space-x-3 p-2">
             <div className="p-2.5 bg-emerald-500/10 text-emerald-500 rounded-lg shrink-0 border border-emerald-500/20">
               <HelpCircle className="w-5 h-5" />
             </div>
             <div>
               <h4 className="font-bold text-sm text-white">HỖ TRỢ 24/7 TẬN TÂM</h4>
-              <p className="text-gray-400 text-[11px] mt-0.5">Liên hệ hotline hoặc Chat trực tiếp để được tư vấn kĩ thuật.</p>
+              <p className="text-gray-400 text-[11px] mt-0.5">Hotline 1900 6789 & Chat trực tiếp kĩ thuật viên.</p>
             </div>
           </div>
         </div>
@@ -94,13 +115,48 @@ export const Footer: React.FC = () => {
 
         {/* Col 2: Hỗ Trợ Khách Hàng */}
         <div className="space-y-3">
-          <h4 className="font-bold text-sm text-white uppercase tracking-wider border-l-2 border-emerald-500 pl-2">HỖ TRỢ KHÁCH HÀNG</h4>
+          <h4 className="font-bold text-sm text-white uppercase tracking-wider border-l-2 border-emerald-500 pl-2">CHÍNH SÁCH & QUY ĐỊNH</h4>
           <ul className="space-y-2 text-[11px] text-gray-400">
-            <li><a href="#help" className="hover:text-emerald-400 transition-colors flex items-center gap-1.5"><HelpCircle className="w-3.5 h-3.5" /> Trung Tâm Trợ Giúp</a></li>
-            <li><a href="#shipping" className="hover:text-emerald-400 transition-colors">Chính Sách Vận Chuyển</a></li>
-            <li><a href="#return" className="hover:text-emerald-400 transition-colors">Chính Sách Trả Hàng & Hoàn Tiền</a></li>
-            <li><a href="#warranty" className="hover:text-emerald-400 transition-colors">Chính Sách Bảo Hành Thiết Bị</a></li>
-            <li><a href="#buyer-protection" className="hover:text-emerald-400 transition-colors">Cẩm Nang Mua Hàng An Toàn</a></li>
+            <li>
+              <button 
+                type="button"
+                onClick={() => setActivePolicyModal('sales')}
+                className="hover:text-emerald-400 transition-colors text-left cursor-pointer flex items-center gap-1.5"
+              >
+                <span>📜</span>
+                <span>Chính Sách Bán Hàng & Quy Định Mua Hàng</span>
+              </button>
+            </li>
+            <li>
+              <button 
+                type="button"
+                onClick={() => setActivePolicyModal('shipping')}
+                className="hover:text-emerald-400 transition-colors text-left cursor-pointer flex items-center gap-1.5"
+              >
+                <span>🚚</span>
+                <span>Chính Sách Vận Chuyển & Giao Nhận Toàn Quốc</span>
+              </button>
+            </li>
+            <li>
+              <button 
+                type="button"
+                onClick={() => setActivePolicyModal('warranty')}
+                className="hover:text-emerald-400 transition-colors text-left cursor-pointer flex items-center gap-1.5"
+              >
+                <span>🛡️</span>
+                <span>Chính Sách Bảo Hành & Đổi Trả (1-Đổi-1)</span>
+              </button>
+            </li>
+            <li>
+              <button 
+                type="button"
+                onClick={() => setActivePolicyModal('sales')}
+                className="hover:text-emerald-400 transition-colors text-left cursor-pointer flex items-center gap-1.5"
+              >
+                <HelpCircle className="w-3.5 h-3.5" />
+                <span>Trung Tâm Trợ Giúp & Hướng Dẫn Mua Hàng</span>
+              </button>
+            </li>
           </ul>
         </div>
 

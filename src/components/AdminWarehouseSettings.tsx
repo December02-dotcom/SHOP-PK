@@ -32,8 +32,12 @@ import {
   ExternalLink,
   ShieldCheck,
   CheckCircle2,
-  Copy
+  Copy,
+  FileText,
+  HelpCircle,
+  ShoppingBag
 } from 'lucide-react';
+import { getEmbeddableGoogleDriveUrl } from '../utils/googleDrive';
 
 export const AdminWarehouseSettings: React.FC = () => {
   const { warehouse, updateWarehouse } = useApp();
@@ -677,13 +681,145 @@ export const AdminWarehouseSettings: React.FC = () => {
             </div>
           </div>
 
+          {/* SECTION 4: GOOGLE DRIVE POLICY LINKS */}
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-emerald-50 text-[#059669] rounded-lg">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide">
+                    4. Nhúng Đường Link Google Drive (Chính Sách Cửa Hàng)
+                  </h3>
+                  <p className="text-[11px] text-gray-400">
+                    Dán đường link Google Docs, Sheets, PDF hoặc file Google Drive để nhúng văn bản chính sách trực tiếp
+                  </p>
+                </div>
+              </div>
+              <span className="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                Google Drive Embed
+              </span>
+            </div>
+
+            {/* Instruction tip box */}
+            <div className="bg-blue-50/70 p-3 rounded-xl border border-blue-100 text-xs text-blue-900 space-y-1">
+              <p className="font-bold flex items-center gap-1.5 text-blue-800">
+                <HelpCircle className="w-3.5 h-3.5" />
+                Hướng dẫn lấy link chia sẻ công khai từ Google Drive:
+              </p>
+              <ol className="list-decimal list-inside text-[11px] text-blue-800/90 space-y-0.5 pl-1">
+                <li>Mở file tài liệu trên Google Drive (Docs / PDF / Sheets).</li>
+                <li>Nhấn nút <strong>Chia sẻ (Share)</strong> ở góc trên bên phải.</li>
+                <li>Tại mục Quyền truy cập chung, chọn: <strong>Bất kỳ ai có đường liên kết (Anyone with the link)</strong> - Chế độ <strong>Người xem (Viewer)</strong>.</li>
+                <li>Nhấn <strong>Sao chép đường liên kết (Copy link)</strong> và dán vào ô bên dưới.</li>
+              </ol>
+            </div>
+
+            {/* Policy Inputs Grid */}
+            <div className="space-y-4 text-xs">
+              {/* 1. Chính sách bán hàng */}
+              <div className="p-3.5 bg-gray-50/70 rounded-xl border border-gray-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-gray-800 flex items-center gap-1.5">
+                    <ShoppingBag className="w-4 h-4 text-emerald-600" />
+                    <span>Chính Sách Bán Hàng (Google Drive URL)</span>
+                  </label>
+                  {form.salesPolicyUrl && (
+                    <a
+                      href={form.salesPolicyUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[11px] text-emerald-700 hover:underline flex items-center gap-1 font-semibold"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      <span>Kiểm tra link</span>
+                    </a>
+                  )}
+                </div>
+                <input
+                  type="url"
+                  placeholder="https://docs.google.com/document/d/... hoặc https://drive.google.com/file/d/..."
+                  value={form.salesPolicyUrl || ''}
+                  onChange={(e) => setForm((prev) => ({ ...prev, salesPolicyUrl: e.target.value }))}
+                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs font-mono outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669]"
+                />
+                <p className="text-[10px] text-gray-400">
+                  Quy định đặt hàng, xác nhận giao dịch, cam kết 100% chính hãng và bảo mật thông tin.
+                </p>
+              </div>
+
+              {/* 2. Chính sách vận chuyển */}
+              <div className="p-3.5 bg-gray-50/70 rounded-xl border border-gray-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-gray-800 flex items-center gap-1.5">
+                    <Truck className="w-4 h-4 text-emerald-600" />
+                    <span>Chính Sách Vận Chuyển & Giao Nhận (Google Drive URL)</span>
+                  </label>
+                  {form.shippingPolicyUrl && (
+                    <a
+                      href={form.shippingPolicyUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[11px] text-emerald-700 hover:underline flex items-center gap-1 font-semibold"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      <span>Kiểm tra link</span>
+                    </a>
+                  )}
+                </div>
+                <input
+                  type="url"
+                  placeholder="https://docs.google.com/document/d/... hoặc https://drive.google.com/file/d/..."
+                  value={form.shippingPolicyUrl || ''}
+                  onChange={(e) => setForm((prev) => ({ ...prev, shippingPolicyUrl: e.target.value }))}
+                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs font-mono outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669]"
+                />
+                <p className="text-[10px] text-gray-400">
+                  Phạm vi giao hàng 63 tỉnh thành, biểu phí cự ly kho, điều kiện Freeship và đồng kiểm khi nhận.
+                </p>
+              </div>
+
+              {/* 3. Chính sách bảo hành */}
+              <div className="p-3.5 bg-gray-50/70 rounded-xl border border-gray-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-gray-800 flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    <span>Chính Sách Bảo Hành & Đổi Trả Thiết Bị (Google Drive URL)</span>
+                  </label>
+                  {form.warrantyPolicyUrl && (
+                    <a
+                      href={form.warrantyPolicyUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[11px] text-emerald-700 hover:underline flex items-center gap-1 font-semibold"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      <span>Kiểm tra link</span>
+                    </a>
+                  )}
+                </div>
+                <input
+                  type="url"
+                  placeholder="https://docs.google.com/document/d/... hoặc https://drive.google.com/file/d/..."
+                  value={form.warrantyPolicyUrl || ''}
+                  onChange={(e) => setForm((prev) => ({ ...prev, warrantyPolicyUrl: e.target.value }))}
+                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs font-mono outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669]"
+                />
+                <p className="text-[10px] text-gray-400">
+                  Thời hạn bảo hành camera/phụ kiện, điều kiện đổi mới 1-đổi-1 trong 7 ngày và quy trình tiếp nhận.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Action Bar */}
           <div className="flex items-center justify-between bg-gray-50 p-4 rounded-2xl border border-gray-200">
             <div className="flex items-center gap-2">
               {savedSuccess && (
                 <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 font-bold bg-emerald-100 px-3 py-1.5 rounded-lg animate-fade-in">
                   <Check className="w-4 h-4" />
-                  Đã lưu cấu hình Kho & Thanh Toán thành công!
+                  Đã lưu cấu hình Kho, Thanh Toán & Chính Sách thành công!
                 </span>
               )}
             </div>
@@ -693,7 +829,7 @@ export const AdminWarehouseSettings: React.FC = () => {
               disabled={isSaving}
               className="bg-[#059669] hover:bg-[#047857] text-white px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              {isSaving ? 'Đang lưu...' : 'Lưu Cấu Hình Kho & Thanh Toán'}
+              {isSaving ? 'Đang lưu...' : 'Lưu Cấu Hình Kho - Vận Chuyển - Chính Sách'}
             </button>
           </div>
         </div>

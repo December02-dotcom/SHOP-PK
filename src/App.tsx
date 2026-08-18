@@ -11,6 +11,7 @@ import { OrderHistory } from './components/OrderHistory';
 import { ShopChat } from './components/ShopChat';
 import { AdminPanel } from './components/AdminPanel';
 import { AuthModal } from './components/AuthModal';
+import { PolicyModal } from './components/PolicyModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { BackToTop } from './components/BackToTop';
 import { Footer } from './components/Footer';
@@ -172,6 +173,9 @@ const ShopContent: React.FC = () => {
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
       />
+
+      {/* Google Drive Policy Embedded Document Modal */}
+      <PolicyModal />
 
       {/* Floating interactive Shop Chat */}
       <ShopChat />

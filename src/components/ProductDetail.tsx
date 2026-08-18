@@ -24,7 +24,7 @@ interface ProductDetailProps {
 }
 
 export const ProductDetail: React.FC<ProductDetailProps> = ({ product, onClose }) => {
-  const { addToCart, setActiveTab, setChatOpen } = useApp();
+  const { addToCart, setActiveTab, setChatOpen, setActivePolicyModal } = useApp();
   
   const [activeImgIdx, setActiveImgIdx] = useState(0);
   const [viewingVideo, setViewingVideo] = useState(false);
@@ -315,20 +315,35 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, onClose }
             </div>
           </div>
 
-          {/* Shop Warranty & Security */}
+          {/* Shop Warranty & Security (Clickable to view Google Drive embedded policies) */}
           <div className="bg-white p-4 rounded-md flex flex-wrap justify-between gap-4 text-xs text-gray-600 shadow-sm border-t-2 border-[#059669]/30">
-            <span className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setActivePolicyModal('warranty')}
+              className="flex items-center gap-1.5 hover:text-[#059669] transition-colors cursor-pointer text-left"
+              title="Nhấn để xem văn bản chính sách bảo hành & đổi trả trên Google Drive"
+            >
               <ShieldCheck className="w-4 h-4 text-[#059669]" />
-              <strong>7 ngày miễn phí trả hàng</strong> - Hoàn tiền tức thì
-            </span>
-            <span className="flex items-center gap-1.5">
+              <span><strong>7 ngày miễn phí trả hàng</strong> - Hoàn tiền tức thì</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActivePolicyModal('sales')}
+              className="flex items-center gap-1.5 hover:text-[#059669] transition-colors cursor-pointer text-left"
+              title="Nhấn để xem cam kết chất lượng & chính sách bán hàng"
+            >
               <ShieldCheck className="w-4 h-4 text-[#059669]" />
-              <strong>Hàng chính hãng 100%</strong> - Đầy đủ giấy tờ
-            </span>
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-[#059669]" />
-              <strong>Miễn phí vận chuyển</strong> - Từ các đơn hàng đạt chuẩn
-            </span>
+              <span><strong>Hàng chính hãng 100%</strong> - Đầy đủ giấy tờ</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActivePolicyModal('shipping')}
+              className="flex items-center gap-1.5 hover:text-[#059669] transition-colors cursor-pointer text-left"
+              title="Nhấn để xem chính sách vận chuyển & cước phí 63 tỉnh"
+            >
+              <Truck className="w-4 h-4 text-[#059669]" />
+              <span><strong>Miễn phí vận chuyển</strong> - Đơn từ 500k</span>
+            </button>
           </div>
 
           {/* Shop Profile section */}
