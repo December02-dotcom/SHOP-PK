@@ -23,7 +23,7 @@ export const ShopChat: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-40 select-none font-sans">
+    <div className="fixed bottom-16 right-4 md:bottom-6 md:right-6 z-40 select-none font-sans">
       {/* Floating Chat Bubble */}
       {!chatOpen && (
         <button

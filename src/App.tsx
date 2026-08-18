@@ -12,6 +12,7 @@ import { ShopChat } from './components/ShopChat';
 import { AdminPanel } from './components/AdminPanel';
 import { AuthModal } from './components/AuthModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
+import { BackToTop } from './components/BackToTop';
 import { Footer } from './components/Footer';
 import { SlidersHorizontal, Check, RefreshCw, Sparkles, Flame, Clock, TrendingUp } from 'lucide-react';
 
@@ -174,6 +175,9 @@ const ShopContent: React.FC = () => {
 
       {/* Floating interactive Shop Chat */}
       <ShopChat />
+
+      {/* Back to top floating button */}
+      <BackToTop />
 
       {/* Mobile Sticky Bottom Navigation Bar */}
       <MobileBottomNav />

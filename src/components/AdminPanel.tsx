@@ -36,8 +36,10 @@ import {
   Calendar,
   Phone,
   ShieldCheck,
-  Users
+  Users,
+  Building2
 } from 'lucide-react';
+import { AdminWarehouseSettings } from './AdminWarehouseSettings';
 
 const iconMap: Record<string, React.ComponentType<any>> = {
   Shirt,
@@ -95,7 +97,7 @@ export const AdminPanel: React.FC = () => {
     serverConnected
   } = useApp();
 
-  const [activeSubTab, setActiveSubTab] = useState<'products' | 'categories' | 'orders' | 'users'>('products');
+  const [activeSubTab, setActiveSubTab] = useState<'products' | 'categories' | 'orders' | 'users' | 'warehouse'>('products');
 
   // Admin login form state
   const [adminUsername, setAdminUsername] = useState('admin');
@@ -622,6 +624,18 @@ export const AdminPanel: React.FC = () => {
             <Users className="w-4 h-4 shrink-0" />
             <span className="hidden sm:inline">Khách Hàng ({usersList.length})</span>
             <span className="inline sm:hidden">Khách hàng ({usersList.length})</span>
+          </button>
+          <button
+            onClick={() => setActiveSubTab('warehouse')}
+            className={`flex-1 sm:flex-none px-4 sm:px-6 py-3.5 font-bold text-xs sm:text-sm text-center border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2 ${
+              activeSubTab === 'warehouse'
+                ? 'border-[#059669] text-[#059669] bg-white'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <Building2 className="w-4 h-4 shrink-0" />
+            <span className="hidden sm:inline">Kho - Vận Chuyển - Thanh Toán</span>
+            <span className="inline sm:hidden">Kho & Thanh Toán</span>
           </button>
         </div>
 
@@ -1258,10 +1272,21 @@ export const AdminPanel: React.FC = () => {
                                   <li className="flex items-center gap-1.5">
                                     <Truck className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                                     <span>
-                                      <strong className="text-gray-700">Vận chuyển:</strong> {o.shippingMethod === 'express' ? 'Hỏa tốc' : o.shippingMethod === 'saver' ? 'Tiết kiệm' : 'Tiêu chuẩn'} 
-                                      <span className="text-gray-400 ml-1">({new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(o.shippingFee)})</span>
+                                      <strong className="text-gray-700">Vận chuyển:</strong> {o.shippingMethod === 'express' ? 'Hỏa tốc (2H)' : o.shippingMethod === 'saver' ? 'Tiết kiệm' : 'Nhanh (Tiêu chuẩn)'} 
+                                      <span className="text-[#059669] font-bold ml-1">({new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(o.shippingFee)})</span>
                                     </span>
                                   </li>
+                                  {o.warehouseOrigin && (
+                                    <li className="flex items-start gap-1.5 bg-emerald-50/70 p-2 rounded border border-emerald-100/80 text-[10px]">
+                                      <Building2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                                      <div>
+                                        <p><strong className="text-emerald-800">Kho xuất hàng:</strong> {o.warehouseOrigin.name} ({o.warehouseOrigin.district}, {o.warehouseOrigin.city})</p>
+                                        {o.shippingDistanceKm !== undefined && (
+                                          <p className="text-gray-500 mt-0.5">Khoảng cách: <strong className="text-gray-700">~{o.shippingDistanceKm} km</strong> {o.estimatedDelivery ? `• Dự kiến: ${o.estimatedDelivery}` : ''}</p>
+                                        )}
+                                      </div>
+                                    </li>
+                                  )}
                                   <li className="flex items-center gap-1.5">
                                     <Coins className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                                     <span>
@@ -1462,6 +1487,11 @@ export const AdminPanel: React.FC = () => {
               </div>
             )}
           </div>
+        )}
+
+        {/* TAB 5: WAREHOUSE & SHIPPING SETTINGS */}
+        {activeSubTab === 'warehouse' && (
+          <AdminWarehouseSettings />
         )}
       </div>
 

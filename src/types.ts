@@ -57,6 +57,37 @@ export interface ShippingAddress {
   street: string;
 }
 
+export interface BankAccount {
+  id: string;
+  bankName: string; // e.g. "MB Bank (Quân Đội)"
+  bankCode: string; // e.g. "MB", "VCB", "TCB", "VPB", "ACB", "BIDV", "ICB", "TPB"
+  accountNumber: string; // e.g. "12345678910"
+  accountHolder: string; // e.g. "LE HOAI NAM"
+  branch?: string; // e.g. "Chi nhánh Cầu Giấy - Hà Nội"
+  qrImageUrl?: string; // Image URL for QR Code (custom or VietQR)
+  isDefault?: boolean;
+}
+
+export interface WarehouseConfig {
+  name: string;
+  phone: string;
+  street: string;
+  ward: string;
+  district: string;
+  city: string;
+  latitude?: number;
+  longitude?: number;
+  baseFeeInnerCity: number; // e.g. 20000 VND
+  baseFeeInterProvince: number; // e.g. 32000 VND
+  baseFeeInterRegion: number; // e.g. 42000 VND
+  expressAvailable: boolean;
+  expressMaxDistanceKm: number; // e.g. 35 km
+  expressBaseFee: number; // e.g. 45000 VND
+  saverBaseFee: number; // e.g. 16000 VND
+  freeShipThreshold: number; // e.g. 500000 VND
+  bankAccounts?: BankAccount[]; // Up to 3 payment bank accounts with QR codes
+}
+
 export interface User {
   id: string;
   name: string;
@@ -81,6 +112,14 @@ export interface Order {
   shippingAddress: ShippingAddress;
   shippingMethod: 'standard' | 'express' | 'saver';
   shippingFee: number;
+  originalShippingFee?: number;
+  shippingDistanceKm?: number;
+  warehouseOrigin?: {
+    name: string;
+    city: string;
+    district: string;
+  };
+  estimatedDelivery?: string;
   paymentMethod: 'cod' | 'bank_transfer';
   voucherCode?: string;
   discountAmount: number;

@@ -18,7 +18,59 @@ interface ServerDB {
   categories: any[];
   users: any[];
   orders: any[];
+  warehouse?: any;
 }
+
+const defaultWarehouse = {
+  name: 'Kho Tổng Hà Nội - Cầu Giấy (Hub Miền Bắc)',
+  phone: '0988.123.456',
+  street: 'Số 144 đường Xuân Thủy',
+  ward: 'Phường Dịch Vọng Hậu',
+  district: 'Quận Cầu Giấy',
+  city: 'Hà Nội',
+  latitude: 21.0368,
+  longitude: 105.7829,
+  baseFeeInnerCity: 20000,
+  baseFeeInterProvince: 30000,
+  baseFeeInterRegion: 40000,
+  expressAvailable: true,
+  expressMaxDistanceKm: 35,
+  expressBaseFee: 45000,
+  saverBaseFee: 15000,
+  freeShipThreshold: 500000,
+  bankAccounts: [
+    {
+      id: 'bank-1',
+      bankName: 'MB Bank (Quân Đội)',
+      bankCode: 'MB',
+      accountNumber: '12345678910',
+      accountHolder: 'LE HOAI NAM',
+      branch: 'Chi nhánh Cầu Giấy - Hà Nội',
+      qrImageUrl: 'https://img.vietqr.io/image/MB-12345678910-compact2.png?accountName=LE%20HOAI%20NAM',
+      isDefault: true
+    },
+    {
+      id: 'bank-2',
+      bankName: 'Vietcombank',
+      bankCode: 'VCB',
+      accountNumber: '001100456789',
+      accountHolder: 'LE HOAI NAM',
+      branch: 'Sở Giao Dịch Hà Nội',
+      qrImageUrl: 'https://img.vietqr.io/image/VCB-001100456789-compact2.png?accountName=LE%20HOAI%20NAM',
+      isDefault: false
+    },
+    {
+      id: 'bank-3',
+      bankName: 'Techcombank',
+      bankCode: 'TCB',
+      accountNumber: '19034567890012',
+      accountHolder: 'LE HOAI NAM',
+      branch: 'Chi nhánh Thăng Long',
+      qrImageUrl: 'https://img.vietqr.io/image/TCB-19034567890012-compact2.png?accountName=LE%20HOAI%20NAM',
+      isDefault: false
+    }
+  ]
+};
 
 // Initial default seed database
 const defaultAdmin = {
@@ -68,7 +120,8 @@ function loadDatabase(): ServerDB {
     products: PRODUCTS,
     categories: CATEGORIES,
     users: [defaultAdmin, defaultCustomer],
-    orders: []
+    orders: [],
+    warehouse: defaultWarehouse
   };
 
   try {
@@ -325,6 +378,25 @@ app.put("/api/orders/:id/status", (req, res) => {
 app.get("/api/users", (req, res) => {
   const sanitized = db.users.map(({ password, ...u }) => u);
   res.json(sanitized);
+});
+
+// Warehouse Settings (Admin / System)
+app.get("/api/settings/warehouse", (req, res) => {
+  if (!db.warehouse) {
+    db.warehouse = defaultWarehouse;
+    saveDatabase(db);
+  }
+  res.json(db.warehouse);
+});
+
+app.put("/api/settings/warehouse", (req, res) => {
+  const updatedWarehouse = req.body;
+  if (!updatedWarehouse || !updatedWarehouse.city) {
+    return res.status(400).json({ error: "Thông tin kho hàng không hợp lệ!" });
+  }
+  db.warehouse = { ...defaultWarehouse, ...updatedWarehouse };
+  saveDatabase(db);
+  res.json(db.warehouse);
 });
 
 // --- VITE / STATIC SERVING ---

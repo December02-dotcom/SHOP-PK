@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { ShoppingBag, ArrowLeft, Calendar, FileText, CheckCircle2, RefreshCw } from 'lucide-react';
+import { ShoppingBag, ArrowLeft, Calendar, FileText, CheckCircle2, RefreshCw, Building2, Truck } from 'lucide-react';
 
 export const OrderHistory: React.FC = () => {
   const { orders, setActiveTab } = useApp();
@@ -112,13 +112,21 @@ export const OrderHistory: React.FC = () => {
             </div>
 
             {/* Bottom summary and payment method info */}
-            <div className="bg-gray-50/50 p-3 rounded-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs text-gray-600 border-t border-gray-50">
+            <div className="bg-gray-50/50 p-3 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs text-gray-600 border border-gray-100">
               <div className="space-y-1">
-                <p>Thanh toán bằng: <strong className="uppercase">{order.paymentMethod === 'cod' ? 'Tiền mặt khi nhận hàng (COD)' : 'Chuyển khoản MB Bank'}</strong></p>
-                <p className="text-[11px] text-gray-400">Người nhận: {order.shippingAddress.fullName} | {order.shippingAddress.phone}</p>
+                <p>Thanh toán: <strong className="uppercase">{order.paymentMethod === 'cod' ? 'Tiền mặt khi nhận hàng (COD)' : 'Chuyển khoản MB Bank'}</strong></p>
+                <p className="text-[11px] text-gray-500">
+                  Người nhận: <strong>{order.shippingAddress.fullName}</strong> ({order.shippingAddress.phone}) • {order.shippingAddress.city}
+                </p>
+                {order.warehouseOrigin && (
+                  <p className="text-[10px] text-emerald-700 font-medium flex items-center gap-1 mt-0.5">
+                    <Building2 className="w-3 h-3 text-emerald-600" />
+                    <span>Kho xuất: {order.warehouseOrigin.name} ({order.warehouseOrigin.city}) • Tuyến ~{order.shippingDistanceKm} km {order.estimatedDelivery ? `(${order.estimatedDelivery})` : ''}</span>
+                  </p>
+                )}
               </div>
               <div className="flex flex-col sm:items-end">
-                <span className="text-gray-400 text-[10px]">Thành tiền:</span>
+                <span className="text-gray-400 text-[10px]">Tổng thanh toán:</span>
                 <span className="text-[#059669] font-black text-sm">{formatVND(order.finalAmount)}</span>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Product, Category, CartItem, Voucher, Order, ShippingAddress, User } from '../types';
+import { Product, Category, CartItem, Voucher, Order, ShippingAddress, User, WarehouseConfig } from '../types';
 import { PRODUCTS, VOUCHERS, CATEGORIES } from '../data';
+import { DEFAULT_WAREHOUSE_CONFIG, calculateShippingEstimate } from '../utils/shipping';
 
 interface AppContextType {
   currentUser: User | null;
@@ -12,6 +13,8 @@ interface AppContextType {
   register: (name: string, email: string, phone: string, pass: string) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
   serverConnected: boolean;
+  warehouse: WarehouseConfig;
+  updateWarehouse: (config: WarehouseConfig) => Promise<void>;
   products: Product[];
   filteredProducts: Product[];
   categories: Category[];
@@ -70,6 +73,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Warehouse State (Set by Admin)
+  const [warehouse, setWarehouse] = useState<WarehouseConfig>(() => {
+    const saved = localStorage.getItem('pkdt_warehouse');
+    return saved ? JSON.parse(saved) : DEFAULT_WAREHOUSE_CONFIG;
+  });
+
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<'popular' | 'latest' | 'sold' | 'price-asc' | 'price-desc'>('popular');
@@ -105,10 +114,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const fetchServerData = async () => {
       try {
-        const [prodRes, catRes, orderRes] = await Promise.all([
+        const [prodRes, catRes, orderRes, whRes] = await Promise.all([
           fetch('/api/products'),
           fetch('/api/categories'),
-          fetch('/api/orders')
+          fetch('/api/orders'),
+          fetch('/api/settings/warehouse')
         ]);
 
         if (prodRes.ok) {
@@ -127,6 +137,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const ords = await orderRes.json();
           if (Array.isArray(ords)) {
             setOrders(ords);
+          }
+        }
+        if (whRes.ok) {
+          const whData = await whRes.json();
+          if (whData && whData.city) {
+            setWarehouse(whData);
           }
         }
       } catch (err) {
@@ -243,6 +259,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     localStorage.setItem('pkdt_categories', JSON.stringify(categories));
   }, [categories]);
+
+  useEffect(() => {
+    localStorage.setItem('pkdt_warehouse', JSON.stringify(warehouse));
+  }, [warehouse]);
+
+  // Warehouse Update (Admin)
+  const updateWarehouse = async (config: WarehouseConfig) => {
+    setWarehouse(config);
+    try {
+      await fetch('/api/settings/warehouse', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+      });
+    } catch (err) {
+      console.error('Failed to sync warehouse settings to server', err);
+    }
+  };
 
   // Products CRUD
   const addProduct = async (product: Product) => {
@@ -407,9 +441,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ) => {
     const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
     
-    let shippingFee = 30000;
-    if (shippingMethod === 'express') shippingFee = 55000;
-    if (shippingMethod === 'saver') shippingFee = 15000;
+    // Calculate dynamic shipping based on warehouse location and customer address
+    const shippingEstimate = calculateShippingEstimate(warehouse, address, subtotal, shippingMethod);
+    const shippingFee = shippingEstimate.selectedFee;
+    const originalShippingFee = shippingEstimate.originalFee;
 
     let discountAmount = 0;
     if (activeVoucher) {
@@ -443,6 +478,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       shippingAddress: address,
       shippingMethod,
       shippingFee,
+      originalShippingFee,
+      shippingDistanceKm: shippingEstimate.distanceKm,
+      warehouseOrigin: {
+        name: warehouse.name,
+        city: warehouse.city,
+        district: warehouse.district
+      },
+      estimatedDelivery: shippingEstimate.selectedEstimatedTime,
       paymentMethod,
       voucherCode: activeVoucher?.code,
       discountAmount,
@@ -528,6 +571,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         register,
         logout,
         serverConnected,
+        warehouse,
+        updateWarehouse,
         products,
         filteredProducts,
         categories,
